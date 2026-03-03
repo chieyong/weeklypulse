@@ -432,15 +432,21 @@ export default function App(){
       {/* Controls — desktop: two rows | mobile: one compact row */}
       {isMobile ? (
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5,rowGap:6,marginBottom:4,flexWrap:"wrap",padding:"0 4px"}}>
-          <select value={multiMode==="allen"?"__all__":member} onChange={e=>{const v=e.target.value;if(v==="__all__"){setMultiMode("allen");setFP(null);setFL(null);setFC(null);}else if(multiMode==="alleWeken"){setMember(v);setFP(null);setFL(null);setFC(null);}else{setMember(v);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);setViewSnap(null);}}} style={{fontFamily:"Nunito",fontSize:".62rem",fontWeight:700,padding:"4px 26px 4px 10px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",flexShrink:1,minWidth:0,maxWidth:132,backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 8px center"}} title="Choose persona">
-            {order.map(id=>{const mm=members[id];if(!mm)return null;return <option key={id} value={id}>{mm.emoji} {mm.label}</option>;})}
-            {order.length>1&&<option value="__all__">All</option>}
-          </select>
-          <select value={viewSnap||(multiMode==="alleWeken"?"__allweeks__":"__live__")} onChange={e=>{const v=e.target.value;if(v==="__live__"){setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}else if(v==="__allweeks__"){setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);}else{const snap=memberSnaps.find(x=>x.id===v);if(snap){setViewSnap(snap.id);setViewSnapMonday(snap.monday);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}}} style={{fontFamily:"Nunito",fontSize:".62rem",fontWeight:600,padding:"4px 22px 4px 10px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",flexShrink:1,minWidth:0,maxWidth:90,backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 7px center"}}>
-            <option value="__live__">Live</option>
-            {memberSnaps.map(snap=><option key={snap.id} value={snap.id}>{snap.label}</option>)}
-            {memberSnaps.length>0&&<option value="__allweeks__">All weeks</option>}
-          </select>
+          <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:1,minWidth:0}}>
+            <select value={multiMode==="allen"?"__all__":member} onChange={e=>{const v=e.target.value;if(v==="__all__"){setMultiMode("allen");setFP(null);setFL(null);setFC(null);}else if(multiMode==="alleWeken"){setMember(v);setFP(null);setFL(null);setFC(null);}else{setMember(v);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);setViewSnap(null);}}} style={{fontFamily:"Nunito",fontSize:".62rem",fontWeight:700,padding:"4px 26px 4px 10px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",flexShrink:1,minWidth:0,maxWidth:132,backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 8px center"}} title="Choose persona">
+              {order.map(id=>{const mm=members[id];if(!mm)return null;return <option key={id} value={id}>{mm.emoji} {mm.label}</option>;})}
+              {order.length>1&&<option value="__all__">All</option>}
+            </select>
+            {tabEdit&&multiMode!=="allen"&&order.length>1&&<button onClick={()=>removeMember(member)} style={{width:18,height:18,borderRadius:"50%",border:"1px solid #E0D4C6",background:"white",color:"#C75D3A",fontSize:".6rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Delete persona">x</button>}
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:1,minWidth:0}}>
+            <select value={viewSnap||(multiMode==="alleWeken"?"__allweeks__":"__live__")} onChange={e=>{const v=e.target.value;if(v==="__live__"){setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}else if(v==="__allweeks__"){setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);}else{const snap=memberSnaps.find(x=>x.id===v);if(snap){setViewSnap(snap.id);setViewSnapMonday(snap.monday);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}}} style={{fontFamily:"Nunito",fontSize:".62rem",fontWeight:600,padding:"4px 22px 4px 10px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",flexShrink:1,minWidth:0,maxWidth:90,backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 7px center"}}>
+              <option value="__live__">Live</option>
+              {memberSnaps.map(snap=><option key={snap.id} value={snap.id}>{snap.label}</option>)}
+              {memberSnaps.length>0&&<option value="__allweeks__">All weeks</option>}
+            </select>
+            {tabEdit&&viewSnap&&<button onClick={()=>deleteSnapshot(viewSnap)} style={{width:18,height:18,borderRadius:"50%",border:"1px solid #E0D4C6",background:"white",color:"#C75D3A",fontSize:".6rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Delete week">x</button>}
+          </div>
           <button onClick={saveSnapshot} style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".75rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save week">📌</button>
           <div style={{display:"flex",gap:0,borderRadius:20,overflow:"hidden",border:"1.5px solid rgba(61,46,31,.12)",flexShrink:0}}>
             <button onClick={()=>setVizMode("wheel")} title="Wheel" style={{padding:"4px 9px",border:"none",background:vizMode==="wheel"?"#3D2E1F":"transparent",color:vizMode==="wheel"?"#FDF6EE":"#8A7560",cursor:"pointer",transition:"all .2s",lineHeight:1,display:"flex",alignItems:"center"}}>
@@ -450,6 +456,7 @@ export default function App(){
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
           </div>
+          {tabEdit&&<button onClick={()=>setShowAdd(true)} style={{width:22,height:22,borderRadius:"50%",border:"1.5px dashed rgba(61,46,31,.15)",background:"transparent",color:"#8A7560",cursor:"pointer",fontSize:".7rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>+</button>}
         </div>
       ) : (
         <>
