@@ -386,7 +386,7 @@ export default function App(){
   return (<div onClick={()=>{if(colorPick)setColorPick(null);}} style={{background:"#FDF6EE",minHeight:"100vh",width:"100%",boxSizing:"border-box",fontFamily:"Nunito,sans-serif",color:"#3D2E1F"}}>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
     <style>{`*{box-sizing:border-box;}html,body,#root{width:100%;min-height:100vh;margin:0;padding:0;background:#FDF6EE;overflow-x:hidden;}@media(max-width:800px){.wk-wheel{position:static!important;max-width:100%!important;width:100%!important;margin:0 auto 12px;padding:0!important;}.wk-wheel svg{max-width:100%!important;width:100%!important;}.wk-edit-btn button{width:30px!important;height:30px!important;}.wk-edit-btn svg{width:14px!important;height:14px!important;}.wk-pin{width:22px!important;height:22px!important;font-size:.7rem!important;}}@keyframes fadeIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.snap-scroll::-webkit-scrollbar{display:none}@media(max-width:800px){.wk-outer{padding:20px 10px 40px!important;}}`}</style>
-    <div className="wk-outer" style={{width:"100%",padding:"36px 24px 60px",position:"relative"}}>
+    <div className="wk-outer" style={{width:"100%",padding:"20px 24px 40px",position:"relative"}}>
       <div style={{position:"absolute",top:36,right:24,zIndex:10,display:"flex",gap:6,alignItems:"center"}} className="wk-edit-btn">
         <button onClick={exportSVG} style={{width:36,height:36,borderRadius:"50%",border:"none",background:"transparent",color:"#8A7560",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .3s",opacity:.5}} title="Export as SVG">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12v2a1 1 0 001 1h10a1 1 0 001-1v-2"/><path d="M9 3v9"/><path d="M5.5 8.5L9 12l3.5-3.5"/></svg>
@@ -395,10 +395,10 @@ export default function App(){
           {tabEdit?"\u2713":<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><line x1="3" y1="5" x2="15" y2="5"/><line x1="3" y1="9" x2="15" y2="9"/><line x1="3" y1="13" x2="15" y2="13"/><circle cx="6" cy="5" r="1.5" fill="currentColor"/><circle cx="11" cy="9" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/></svg>}
         </button>
       </div>
-      <div style={{textAlign:"center",marginBottom:24}}>
+      <div style={{textAlign:"center",marginBottom:10}}>
         {tabEdit?(<input value={pageTitle} onChange={e=>setPageTitle(e.target.value)} style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(2rem,5vw,3rem)",fontWeight:700,letterSpacing:"-.02em",marginBottom:4,border:"none",borderBottom:"2px dashed #C75D3A",background:"transparent",textAlign:"center",outline:"none",color:"#3D2E1F",width:"80%",maxWidth:500}}/>):(<h1 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(2rem,5vw,3rem)",fontWeight:700,letterSpacing:"-.02em",marginBottom:4}}>{pageTitle}</h1>)}
       </div>
-      <div style={{display:"flex",justifyContent:"center",gap:4,marginBottom:8,flexWrap:"wrap",alignItems:"center"}}>
+      <div style={{display:"flex",justifyContent:"center",gap:4,marginBottom:6,flexWrap:"wrap",alignItems:"center"}}>
         {order.map(id=>{const mm=members[id];if(!mm)return null;return (<div key={id} style={{position:"relative",display:"inline-flex"}}>
             {tabEdit&&editMemberName===id?(<div style={{display:"flex",alignItems:"center",background:member===id?"#3D2E1F":"white",borderRadius:16,border:"1.5px solid "+(member===id?"#3D2E1F":"rgba(61,46,31,.12)"),padding:"2px 8px",gap:3}}>
               <span style={{fontSize:".72rem"}}>{mm.emoji}</span>
@@ -409,39 +409,31 @@ export default function App(){
         {tabEdit&&<button onClick={()=>setShowAdd(true)} style={{width:22,height:22,borderRadius:"50%",border:"1.5px dashed rgba(61,46,31,.15)",background:"transparent",color:"#8A7560",cursor:"pointer",fontSize:".7rem",display:"flex",alignItems:"center",justifyContent:"center",animation:"fadeIn .2s ease"}}>+</button>}
         {!tabEdit&&order.length>1&&multiMode!=="alleWeken"&&<button onClick={()=>{setMultiMode(multiMode==="allen"?"enkel":"allen");setFP(null);setFL(null);setFC(null);}} style={{fontFamily:"Nunito",fontSize:".68rem",fontWeight:700,padding:"3px 12px",borderRadius:16,border:"1.5px solid "+(multiMode==="allen"?"#3D2E1F":"rgba(61,46,31,.12)"),background:multiMode==="allen"?"#3D2E1F":"transparent",color:multiMode==="allen"?"#FDF6EE":"#8A7560",cursor:"pointer",transition:"all .3s",lineHeight:1.3}}>All</button>}
       </div>
-      {/* Snapshot strip */}
-      <div style={{marginBottom:16,padding:"0 4px"}}>
-        <div style={{display:"flex",alignItems:"center",gap:6}}>
-          <button onClick={saveSnapshot} className="wk-pin" style={{width:24,height:24,borderRadius:"50%",border:"none",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".72rem",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s",opacity:.5,flexShrink:0}} title="Save this week">{"\ud83d\udccc"}</button>
-          {memberSnaps.length>0&&<>
-          <div style={{width:1,height:14,background:"#E8D5C0",flexShrink:0}}/>
-          <div style={{flex:1,minWidth:0,overflow:"hidden",position:"relative"}}>
-            <div style={{display:"flex",gap:4,overflowX:"auto",padding:"4px 4px 4px 2px",scrollbarWidth:"none",WebkitOverflowScrolling:"touch",msOverflowStyle:"none"}} className="snap-scroll">
-              {multiMode!=="allen"&&<button onClick={()=>{if(multiMode==="alleWeken"){setMultiMode("enkel");}else{setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);setFP(null);setFL(null);setFC(null);}}} style={{fontSize:".54rem",padding:"3px 8px",borderRadius:8,border:"1.5px solid "+(multiMode==="alleWeken"?"#5B7A6E":"rgba(61,46,31,.1)"),background:multiMode==="alleWeken"?"#5B7A6E":"white",color:multiMode==="alleWeken"?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap",boxShadow:"0 1px 3px rgba(61,46,31,.06)",flexShrink:0}}>All weeks</button>}
-              {memberSnaps.map(s=>(<div key={s.id} style={{position:"relative",display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0,gap:2}}>
-                {editSnapDate===s.id?(<div style={{display:"flex",alignItems:"center",gap:3}}><input type="date" autoFocus value={s.monday||""} onChange={e=>{updateSnapDate(s.id,e.target.value);}} onBlur={()=>setEditSnapDate(null)} style={{fontSize:".54rem",width:86,padding:"2px 5px",borderRadius:8,border:"1.5px solid #5B7A6E",background:"white",color:"#3D2E1F",fontFamily:"Nunito",outline:"none"}}/></div>
-                ):(<button onClick={()=>{if(tabEdit){setEditSnapDate(s.id);}else{const newSnap=viewSnap===s.id?null:s.id;setViewSnap(newSnap);setViewSnapMonday(newSnap?s.monday:null);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}} style={{fontSize:".54rem",padding:"3px 8px",borderRadius:8,border:"1.5px solid "+(viewSnap===s.id?"#5B7A6E":"rgba(61,46,31,.1)"),background:viewSnap===s.id?"#5B7A6E":"white",color:viewSnap===s.id?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap",boxShadow:"0 1px 3px rgba(61,46,31,.06)"}}>{s.label}</button>)}
-                {tabEdit&&<button onClick={e=>{e.stopPropagation();deleteSnapshot(s.id);}} style={{position:"absolute",top:-3,right:-3,width:12,height:12,borderRadius:"50%",border:"1px solid #E0D4C6",background:"white",color:"#C75D3A",fontSize:".4rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Nunito",boxShadow:"0 1px 2px rgba(0,0,0,.08)"}}>x</button>}
-              </div>))}
-              <button onClick={()=>{setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}} style={{fontSize:".54rem",padding:"3px 8px",borderRadius:8,border:"1.5px solid "+(multiMode==="enkel"&&!viewSnap?"#3D2E1F":"rgba(61,46,31,.1)"),background:multiMode==="enkel"&&!viewSnap?"#3D2E1F":"white",color:multiMode==="enkel"&&!viewSnap?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap",boxShadow:"0 1px 3px rgba(61,46,31,.06)",flexShrink:0}}>Live</button>
-            </div>
-            {memberSnaps.length>2&&<div style={{position:"absolute",right:0,top:0,bottom:0,width:24,background:"linear-gradient(to right, transparent, #FDF6EE)",pointerEvents:"none"}}/>}
-          </div>
-          </>}
-          <div style={{width:1,height:14,background:"#E8D5C0",flexShrink:0}}/>
-          <div style={{display:"flex",gap:0,borderRadius:8,overflow:"hidden",border:"1.5px solid #E8D5C0",flexShrink:0}}>
-            <button onClick={()=>setVizMode("wheel")} style={{fontSize:".54rem",padding:"3px 8px",border:"none",background:vizMode==="wheel"?"#3D2E1F":"transparent",color:vizMode==="wheel"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Wheel</button>
-            <button onClick={()=>setVizMode("timeline")} style={{fontSize:".54rem",padding:"3px 8px",border:"none",borderLeft:"1px solid #E8D5C0",background:vizMode==="timeline"?"#3D2E1F":"transparent",color:vizMode==="timeline"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Timeline</button>
-          </div>
+      {/* Unified toolbar: weeks + viz */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+        {memberSnaps.length>0&&<>
+          {multiMode!=="allen"&&<button onClick={()=>{if(multiMode==="alleWeken"){setMultiMode("enkel");}else{setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);setFP(null);setFL(null);setFC(null);}}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+(multiMode==="alleWeken"?"#5B7A6E":"rgba(61,46,31,.12)"),background:multiMode==="alleWeken"?"#5B7A6E":"transparent",color:multiMode==="alleWeken"?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>All weeks</button>}
+          {memberSnaps.map(s=>(<div key={s.id} style={{position:"relative",flexShrink:0}}>
+            {editSnapDate===s.id?(<input type="date" autoFocus value={s.monday||""} onChange={e=>updateSnapDate(s.id,e.target.value)} onBlur={()=>setEditSnapDate(null)} style={{fontSize:".58rem",width:90,padding:"4px 8px",borderRadius:20,border:"1.5px solid #5B7A6E",background:"white",color:"#3D2E1F",fontFamily:"Nunito",outline:"none"}}/>
+            ):(<button onClick={()=>{if(tabEdit){setEditSnapDate(s.id);}else{const n=viewSnap===s.id?null:s.id;setViewSnap(n);setViewSnapMonday(n?s.monday:null);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+(viewSnap===s.id?"#5B7A6E":"rgba(61,46,31,.12)"),background:viewSnap===s.id?"#5B7A6E":"transparent",color:viewSnap===s.id?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>{s.label}</button>)}
+            {tabEdit&&<button onClick={e=>{e.stopPropagation();deleteSnapshot(s.id);}} style={{position:"absolute",top:-4,right:-4,width:13,height:13,borderRadius:"50%",border:"1px solid #E0D4C6",background:"white",color:"#C75D3A",fontSize:".4rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 1px 2px rgba(0,0,0,.08)"}}>x</button>}
+          </div>))}
+          <button onClick={()=>{setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+(multiMode==="enkel"&&!viewSnap?"#3D2E1F":"rgba(61,46,31,.12)"),background:multiMode==="enkel"&&!viewSnap?"#3D2E1F":"transparent",color:multiMode==="enkel"&&!viewSnap?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>Live</button>
+          <div style={{width:1,height:16,background:"#D4C4B0",margin:"0 4px",flexShrink:0}}/>
+        </>}
+        <div style={{display:"flex",gap:0,borderRadius:20,overflow:"hidden",border:"1.5px solid rgba(61,46,31,.12)",flexShrink:0}}>
+          <button onClick={()=>setVizMode("wheel")} style={{fontSize:".62rem",padding:"4px 14px",border:"none",background:vizMode==="wheel"?"#3D2E1F":"transparent",color:vizMode==="wheel"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Wheel</button>
+          <button onClick={()=>setVizMode("timeline")} style={{fontSize:".62rem",padding:"4px 14px",border:"none",borderLeft:"1px solid rgba(61,46,31,.1)",background:vizMode==="timeline"?"#3D2E1F":"transparent",color:vizMode==="timeline"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Timeline</button>
         </div>
+        <button onClick={saveSnapshot} style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save this week">📌</button>
       </div>
       {/* Bio */}
       {multiMode!=="allen"&&m.bio!==undefined&&<div style={{textAlign:"center",marginBottom:8}}>
         {tabEdit?(<input value={m.bio||""} onChange={e=>setMembers(prev=>{const n=clone(prev);n[member].bio=e.target.value;return n;})} placeholder="Short description..." style={{border:"none",borderBottom:"1px dashed #C75D3A",background:"transparent",fontSize:".72rem",fontFamily:"Nunito",fontStyle:"italic",color:"#B8A08A",outline:"none",textAlign:"center",width:"60%",maxWidth:400,padding:"2px 0"}}/>):(<p style={{fontSize:".72rem",color:"#B8A08A",fontStyle:"italic",fontWeight:300,margin:0}}>{m.bio}</p>)}
       </div>}
       {/* Visual area */}
-      {multiMode==="enkel"?(<div style={{maxWidth:800,margin:"0 auto"}}>
-        <div ref={wheelRef} style={{display:"flex",justifyContent:"center",flexDirection:"column",alignItems:"center"}}>
+      {multiMode==="enkel"?(<div style={{width:"100%",display:"flex",justifyContent:"center"}}>
+        <div ref={wheelRef} style={{width:"100%",maxWidth:vizMode==="wheel"?"min(76vh,840px)":"840px",display:"flex",justifyContent:"center",flexDirection:"column",alignItems:"center"}}>
           {vizMode==="wheel"?(<Wheel days={days} highlightIdx={drawerDay!==null?drawerDay:hl} centerText={center} filterPerson={fP} filterLoc={fL} filterCat={fC} onDayClick={i=>{setMultiMode("enkel");setDrawerDay(drawerDay===i?null:i);}}/>):(<TimelineChart days={days} cats={cats} highlightIdx={drawerDay!==null?drawerDay:hl} filterCat={fC} centerText={center} onDayClick={i=>{setMultiMode("enkel");setDrawerDay(drawerDay===i?null:i);}}/>)}
         </div>
       </div>):multiMode==="allen"?(<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20,maxWidth:1200,margin:"0 auto"}}>
