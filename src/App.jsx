@@ -498,8 +498,6 @@ export default function App(){
         </div>
         </>
       )}
-        <button onClick={saveSnapshot} style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save this week">📌</button>
-      </div>
       {/* Bio */}
       {multiMode!=="allen"&&m.bio!==undefined&&<div style={{textAlign:"center",marginBottom:8}}>
         {tabEdit?(<input value={m.bio||""} onChange={e=>setMembers(prev=>{const n=clone(prev);n[member].bio=e.target.value;return n;})} placeholder="Short description..." style={{border:"none",borderBottom:"1px dashed #C75D3A",background:"transparent",fontSize:".72rem",fontFamily:"Nunito",fontStyle:"italic",color:"#B8A08A",outline:"none",textAlign:"center",width:"60%",maxWidth:400,padding:"2px 0"}}/>):(<p style={{fontSize:".72rem",color:"#B8A08A",fontStyle:"italic",fontWeight:300,margin:0}}>{m.bio}</p>)}
