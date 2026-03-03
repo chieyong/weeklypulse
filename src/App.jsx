@@ -323,6 +323,11 @@ function getMonday(d){const dt=new Date(d||Date.now());const day=dt.getDay();con
 function fmtMonday(d){const dt=typeof d==='string'?new Date(d):d;const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];const start=new Date(dt.getFullYear(),0,1);const wk=Math.ceil(((dt-start)/86400000+start.getDay()+1)/7);return "Wk "+wk+" \u00b7 "+dt.getDate()+" "+months[dt.getMonth()];}
 function toDateStr(d){const dt=typeof d==='string'?new Date(d):d;return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");}
 
+// Small reusable delete button for dropdowns
+const DelBtn = ({onClick,title}) => (
+  <button onClick={onClick} title={title} style={{width:18,height:18,borderRadius:"50%",border:"1.5px solid #E8C4B4",background:"white",color:"#C75D3A",fontSize:".55rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s"}}>✕</button>
+);
+
 export default function App(){
   const[members,setMembers]=useState(()=>clone(INIT_MEMBERS));
   const[order,setOrder]=useState(["ik","partner","son","daughter"]);
@@ -392,26 +397,62 @@ export default function App(){
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
     <style>{`*{box-sizing:border-box;}html,body,#root{width:100%;min-height:100vh;margin:0;padding:0;background:#FDF6EE;overflow-x:hidden;}@media(max-width:800px){.wk-wheel{position:static!important;max-width:100%!important;width:100%!important;margin:0 auto 12px;padding:0!important;}.wk-wheel svg{max-width:100%!important;width:100%!important;}.wk-edit-btn button{width:24px!important;height:24px!important;font-size:12px!important;}.wk-pin{width:22px!important;height:22px!important;font-size:.7rem!important;}}@keyframes fadeIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.snap-scroll::-webkit-scrollbar{display:none}@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}@media(max-width:800px){.wk-outer{padding:20px 10px 40px!important;}}`}</style>
     <div className="wk-outer" style={{width:"100%",minHeight:"100vh",display:"flex",flexDirection:"column",padding:"20px 24px 52px",position:"relative"}}>
+
+      {/* ── GEAR BUTTON – terracotta achtergrond als edit actief ── */}
       <div style={{position:"absolute",top:12,right:12,zIndex:220,display:"flex",alignItems:"center"}} className="wk-edit-btn">
-        <button onClick={()=>setTabEdit(!tabEdit)} style={{width:30,height:30,borderRadius:"50%",border:"none",background:"transparent",color:tabEdit?"#C75D3A":"#8A7560",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"color .2s",boxShadow:"none",padding:0,fontSize:"14px",lineHeight:1,fontFamily:"Nunito"}} title="Edit personas & weeks" aria-label="Edit personas & weeks">
-          <span aria-hidden="true">⚙</span>
+        <button
+          onClick={()=>setTabEdit(!tabEdit)}
+          title="Edit personas & weeks"
+          aria-label="Edit personas & weeks"
+          style={{
+            width:30,height:30,borderRadius:8,border:"none",
+            background:tabEdit?"#C75D3A":"transparent",
+            color:tabEdit?"white":"#8A7560",
+            cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",
+            transition:"all .2s",
+            boxShadow:tabEdit?"0 2px 10px rgba(199,93,58,.4)":"none",
+            padding:0,lineHeight:1
+          }}>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none" aria-hidden="true">
+            <rect x="0" y="0" width="16" height="2" rx="1" fill="currentColor"/>
+            <rect x="0" y="5" width="16" height="2" rx="1" fill="currentColor"/>
+            <rect x="0" y="10" width="16" height="2" rx="1" fill="currentColor"/>
+          </svg>
         </button>
       </div>
+
       <div ref={titleRef} style={{textAlign:"center",marginBottom:isMobile?22:30}}>
         {tabEdit?(<input value={pageTitle} onChange={e=>setPageTitle(e.target.value)} style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(2rem,5vw,3rem)",fontWeight:700,letterSpacing:"-.02em",marginBottom:4,border:"none",borderBottom:"2px dashed #C75D3A",background:"transparent",textAlign:"center",outline:"none",color:"#3D2E1F",width:"80%",maxWidth:500}}/>):(<h1 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(2rem,5vw,3rem)",fontWeight:700,letterSpacing:"-.02em",marginBottom:4}}>{pageTitle}</h1>)}
       </div>
+
       {/* Sticky navbar */}
       {sticky&&<div style={{position:"fixed",top:0,left:0,right:0,zIndex:200,background:"rgba(253,246,238,.93)",backdropFilter:"blur(14px)",WebkitBackdropFilter:"blur(14px)",borderBottom:"1px solid rgba(212,196,176,.4)",padding:"7px 16px",display:"flex",alignItems:"center",gap:8,animation:"slideDown .18s ease"}}>
         <div style={{display:"flex",gap:0,borderRadius:20,overflow:"hidden",border:"1.5px solid rgba(61,46,31,.12)",flexShrink:0}}>
           {order.map((id,i)=>{const mm=members[id];if(!mm)return null;const act=multiMode!=="allen"&&multiMode!=="alleWeken"&&member===id;return(<button key={id} onClick={()=>{setMember(id);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);setViewSnap(null);}} title={mm.label} style={{fontFamily:"Nunito",fontSize:".65rem",fontWeight:700,padding:"4px 10px",border:"none",borderLeft:i===0?"none":"1px solid rgba(61,46,31,.1)",background:act?"#3D2E1F":"transparent",color:act?"#FDF6EE":"#8A7560",cursor:"pointer",transition:"all .2s",whiteSpace:"nowrap"}}>{mm.emoji} {mm.label}</button>);})}
           {order.length>1&&<button onClick={()=>{setMultiMode(multiMode==="allen"?"enkel":"allen");setFP(null);setFL(null);setFC(null);}} style={{fontFamily:"Nunito",fontSize:".65rem",fontWeight:700,padding:"4px 10px",border:"none",borderLeft:"1px solid rgba(61,46,31,.1)",background:multiMode==="allen"?"#3D2E1F":"transparent",color:multiMode==="allen"?"#FDF6EE":"#8A7560",cursor:"pointer",transition:"all .2s"}}>All</button>}
         </div>
-        <div style={{flex:1,display:"flex",justifyContent:"center"}}>
-          {multiMode!=="allen"&&<select value={viewSnap||(multiMode==="alleWeken"?"__allweeks__":"__live__")} onChange={e=>{const v=e.target.value;if(v==="__live__"){setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}else if(v==="__allweeks__"){setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);}else{const s=memberSnaps.find(x=>x.id===v);if(s){setViewSnap(s.id);setViewSnapMonday(s.monday);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}}} style={{fontFamily:"Nunito",fontSize:".65rem",fontWeight:600,padding:"4px 28px 4px 12px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 10px center",minWidth:80}}>
-            <option value="__live__">Live</option>
-            {memberSnaps.map(s=><option key={s.id} value={s.id}>{s.label}</option>)}
-            {memberSnaps.length>0&&<option value="__allweeks__">All weeks</option>}
-          </select>}
+        <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
+          {/* Sticky: persona dropdown + delete + nieuw */}
+          {multiMode!=="allen"&&(
+            <div style={{display:"flex",alignItems:"center",gap:3}}>
+              <select value={member} onChange={e=>{setMember(e.target.value);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);setViewSnap(null);}} style={{fontFamily:"Nunito",fontSize:".65rem",fontWeight:600,padding:"4px 28px 4px 12px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 10px center",minWidth:80}}>
+                {order.map(id=>{const mm=members[id];if(!mm)return null;return <option key={id} value={id}>{mm.emoji} {mm.label}</option>;})}
+              </select>
+              {tabEdit&&order.length>1&&<DelBtn onClick={e=>{e.stopPropagation();removeMember(member);}} title="Verwijder persona"/>}
+              {tabEdit&&<button onClick={()=>setShowAdd(true)} title="Nieuw persona" style={{width:18,height:18,borderRadius:"50%",border:"1.5px dashed rgba(61,46,31,.2)",background:"transparent",color:"#8A7560",fontSize:".6rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>+</button>}
+            </div>
+          )}
+          {/* Sticky: week dropdown + delete */}
+          {multiMode!=="allen"&&(
+            <div style={{display:"flex",alignItems:"center",gap:3}}>
+              <select value={viewSnap||(multiMode==="alleWeken"?"__allweeks__":"__live__")} onChange={e=>{const v=e.target.value;if(v==="__live__"){setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}else if(v==="__allweeks__"){setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);}else{const s=memberSnaps.find(x=>x.id===v);if(s){setViewSnap(s.id);setViewSnapMonday(s.monday);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}}} style={{fontFamily:"Nunito",fontSize:".65rem",fontWeight:600,padding:"4px 28px 4px 12px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 10px center",minWidth:80}}>
+                <option value="__live__">Live</option>
+                {memberSnaps.map(s=><option key={s.id} value={s.id}>{s.label}</option>)}
+                {memberSnaps.length>0&&<option value="__allweeks__">All weeks</option>}
+              </select>
+              {tabEdit&&viewSnap&&<DelBtn onClick={e=>{e.stopPropagation();deleteSnapshot(viewSnap);}} title="Verwijder week"/>}
+            </div>
+          )}
           {multiMode==="enkel"&&allP.length>0&&<select value={fP||""} onChange={e=>setFP(e.target.value||null)} style={{fontFamily:"Nunito",fontSize:".62rem",fontWeight:600,padding:"4px 24px 4px 10px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:fP?"#3D2E1F":"#B8A08A",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 8px center"}}>
             <option value="">With…</option>
             {allP.map(p=><option key={p} value={p}>{p}</option>)}
@@ -426,28 +467,32 @@ export default function App(){
             <button onClick={()=>setVizMode("wheel")} style={{fontSize:".65rem",padding:"4px 12px",border:"none",background:vizMode==="wheel"?"#3D2E1F":"transparent",color:vizMode==="wheel"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Wheel</button>
             <button onClick={()=>setVizMode("timeline")} style={{fontSize:".65rem",padding:"4px 12px",border:"none",borderLeft:"1px solid rgba(61,46,31,.1)",background:vizMode==="timeline"?"#3D2E1F":"transparent",color:vizMode==="timeline"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Timeline</button>
           </div>
-          <button onClick={saveSnapshot} style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".75rem",display:"flex",alignItems:"center",justifyContent:"center"}} title="Save week">📌</button>
+          <button onClick={saveSnapshot} style={{width:26,height:26,borderRadius:"50%",border:"none",background:"transparent",color:"#D4C4B0",cursor:"pointer",fontSize:".75rem",display:"flex",alignItems:"center",justifyContent:"center"}} title="Save week">📌</button>
         </div>
       </div>}
-      {/* Controls — desktop: two rows | mobile: one compact row */}
+
+      {/* Controls */}
       {isMobile ? (
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5,rowGap:6,marginBottom:4,flexWrap:"wrap",padding:"0 4px"}}>
+          {/* Mobile: persona dropdown + delete + nieuw */}
           <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:1,minWidth:0}}>
             <select value={multiMode==="allen"?"__all__":member} onChange={e=>{const v=e.target.value;if(v==="__all__"){setMultiMode("allen");setFP(null);setFL(null);setFC(null);}else if(multiMode==="alleWeken"){setMember(v);setFP(null);setFL(null);setFC(null);}else{setMember(v);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);setViewSnap(null);}}} style={{fontFamily:"Nunito",fontSize:".62rem",fontWeight:700,padding:"4px 26px 4px 10px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",flexShrink:1,minWidth:0,maxWidth:132,backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 8px center"}} title="Choose persona">
               {order.map(id=>{const mm=members[id];if(!mm)return null;return <option key={id} value={id}>{mm.emoji} {mm.label}</option>;})}
               {order.length>1&&<option value="__all__">All</option>}
             </select>
-            {tabEdit&&multiMode!=="allen"&&order.length>1&&<button onClick={()=>removeMember(member)} style={{width:18,height:18,borderRadius:"50%",border:"1px solid #E0D4C6",background:"white",color:"#C75D3A",fontSize:".6rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Delete persona">x</button>}
+            {tabEdit&&multiMode!=="allen"&&order.length>1&&<DelBtn onClick={e=>{e.stopPropagation();removeMember(member);}} title="Verwijder persona"/>}
+            {tabEdit&&<button onClick={()=>setShowAdd(true)} title="Nieuw persona" style={{width:18,height:18,borderRadius:"50%",border:"1.5px dashed rgba(61,46,31,.2)",background:"transparent",color:"#8A7560",fontSize:".6rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>+</button>}
           </div>
+          {/* Mobile: week dropdown + delete */}
           <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:1,minWidth:0}}>
             <select value={viewSnap||(multiMode==="alleWeken"?"__allweeks__":"__live__")} onChange={e=>{const v=e.target.value;if(v==="__live__"){setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}else if(v==="__allweeks__"){setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);}else{const snap=memberSnaps.find(x=>x.id===v);if(snap){setViewSnap(snap.id);setViewSnapMonday(snap.monday);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}}} style={{fontFamily:"Nunito",fontSize:".62rem",fontWeight:600,padding:"4px 22px 4px 10px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",flexShrink:1,minWidth:0,maxWidth:90,backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 7px center"}}>
               <option value="__live__">Live</option>
               {memberSnaps.map(snap=><option key={snap.id} value={snap.id}>{snap.label}</option>)}
               {memberSnaps.length>0&&<option value="__allweeks__">All weeks</option>}
             </select>
-            {tabEdit&&viewSnap&&<button onClick={()=>deleteSnapshot(viewSnap)} style={{width:18,height:18,borderRadius:"50%",border:"1px solid #E0D4C6",background:"white",color:"#C75D3A",fontSize:".6rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Delete week">x</button>}
+            {tabEdit&&viewSnap&&<DelBtn onClick={e=>{e.stopPropagation();deleteSnapshot(viewSnap);}} title="Verwijder week"/>}
           </div>
-          <button onClick={saveSnapshot} style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".75rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save week">📌</button>
+          <button onClick={saveSnapshot} style={{width:26,height:26,borderRadius:"50%",border:"none",background:"transparent",color:"#D4C4B0",cursor:"pointer",fontSize:".75rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save week">📌</button>
           <div style={{display:"flex",gap:0,borderRadius:20,overflow:"hidden",border:"1.5px solid rgba(61,46,31,.12)",flexShrink:0}}>
             <button onClick={()=>setVizMode("wheel")} title="Wheel" style={{padding:"4px 9px",border:"none",background:vizMode==="wheel"?"#3D2E1F":"transparent",color:vizMode==="wheel"?"#FDF6EE":"#8A7560",cursor:"pointer",transition:"all .2s",lineHeight:1,display:"flex",alignItems:"center"}}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
@@ -456,7 +501,6 @@ export default function App(){
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
           </div>
-          {tabEdit&&<button onClick={()=>setShowAdd(true)} style={{width:22,height:22,borderRadius:"50%",border:"1.5px dashed rgba(61,46,31,.15)",background:"transparent",color:"#8A7560",cursor:"pointer",fontSize:".7rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>+</button>}
         </div>
       ) : (
         <>
@@ -481,7 +525,7 @@ export default function App(){
               <button onClick={()=>{setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+(multiMode==="enkel"&&!viewSnap?"#3D2E1F":"rgba(61,46,31,.12)"),background:multiMode==="enkel"&&!viewSnap?"#3D2E1F":"transparent",color:multiMode==="enkel"&&!viewSnap?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>Live</button>
               <div style={{width:1,height:16,background:"#D4C4B0",margin:"0 4px",flexShrink:0}}/>
             </>)}
-            <button onClick={saveSnapshot} style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save this week">📌</button>
+            <button onClick={saveSnapshot} style={{width:28,height:28,borderRadius:"50%",border:"none",background:"transparent",color:"#D4C4B0",cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save this week">📌</button>
             <div style={{display:"flex",gap:0,borderRadius:20,overflow:"hidden",border:"1.5px solid rgba(61,46,31,.12)",flexShrink:0}}>
               <button onClick={()=>setVizMode("wheel")} style={{fontSize:".62rem",padding:"4px 14px",border:"none",background:vizMode==="wheel"?"#3D2E1F":"transparent",color:vizMode==="wheel"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Wheel</button>
               <button onClick={()=>setVizMode("timeline")} style={{fontSize:".62rem",padding:"4px 14px",border:"none",borderLeft:"1px solid rgba(61,46,31,.1)",background:vizMode==="timeline"?"#3D2E1F":"transparent",color:vizMode==="timeline"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Timeline</button>
@@ -539,7 +583,7 @@ export default function App(){
             <button onClick={()=>setDrawerDay(null)} style={{width:32,height:32,borderRadius:"50%",border:"none",background:"#F0E4D6",color:"#8A7560",cursor:"pointer",fontSize:".9rem",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Nunito"}}>{"\u2715"}</button>
           </div>
           <p style={{fontSize:".62rem",color:"#C75D3A",marginBottom:10,fontFamily:"Nunito",fontWeight:600}}>{"\u270E"} Click the pencil in the card to edit</p>
-          {days[drawerDay]&&<DayCard key={member+"-"+(viewSnap||"live")+"-drawer-"+drawerDay} day={days[drawerDay]} dayIdx={drawerDay} onUpdate={updateDay} onHover={()=>{}} onPin={()=>{}} highlighted={false} dimmed={false} globalEdit={tabEdit} memberCats={cats} allLocs={allL} allPeople={allP} onAddCategory={addCategory}/>} 
+          {days[drawerDay]&&<DayCard key={member+"-"+(viewSnap||"live")+"-drawer-"+drawerDay} day={days[drawerDay]} dayIdx={drawerDay} onUpdate={updateDay} onHover={()=>{}} onPin={()=>{}} highlighted={false} dimmed={false} globalEdit={tabEdit} memberCats={cats} allLocs={allL} allPeople={allP} onAddCategory={addCategory}/>}
           <div style={{display:"flex",justifyContent:"space-between",marginTop:16}}>
             <button onClick={()=>setDrawerDay(Math.max(0,drawerDay-1))} disabled={drawerDay===0} style={{fontSize:".68rem",padding:"5px 14px",borderRadius:10,border:"1.5px solid #E8D5C0",background:"white",color:drawerDay===0?"#D4C4B0":"#3D2E1F",cursor:drawerDay===0?"default":"pointer",fontFamily:"Nunito",fontWeight:600}}>{"\u2190"} {drawerDay>0?days[drawerDay-1]?.short:""}</button>
             <button onClick={()=>setDrawerDay(Math.min(6,drawerDay+1))} disabled={drawerDay===6} style={{fontSize:".68rem",padding:"5px 14px",borderRadius:10,border:"1.5px solid #E8D5C0",background:"white",color:drawerDay===6?"#D4C4B0":"#3D2E1F",cursor:drawerDay===6?"default":"pointer",fontFamily:"Nunito",fontWeight:600}}>{drawerDay<6?days[drawerDay+1]?.short:""} {"\u2192"}</button>
