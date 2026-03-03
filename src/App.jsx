@@ -437,7 +437,7 @@ export default function App(){
       </div>}
       {/* Controls — desktop: two rows | mobile: one compact row */}
       {isMobile ? (
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5,marginBottom:8,flexWrap:"nowrap",padding:"0 4px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5,marginBottom:4,flexWrap:"nowrap",padding:"0 4px"}}>
           <div style={{display:"flex",gap:0,borderRadius:20,overflow:"hidden",border:"1.5px solid rgba(61,46,31,.12)",flexShrink:0}}>
             {order.map((id,i)=>{const mm=members[id];if(!mm)return null;const act=multiMode!=="allen"&&multiMode!=="alleWeken"&&member===id;return (
               <button key={id} onClick={()=>{if(tabEdit&&member===id){setEditMemberName(id);}else if(multiMode==="alleWeken"){setMember(id);setFP(null);setFL(null);setFC(null);}else{setMember(id);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);setViewSnap(null);}}} style={{fontFamily:"Nunito",fontSize:".72rem",padding:"4px 8px",border:"none",borderLeft:i===0?"none":"1px solid rgba(61,46,31,.1)",background:act?"#3D2E1F":"transparent",color:act?"#FDF6EE":"#8A7560",cursor:"pointer",transition:"all .2s",lineHeight:1,whiteSpace:"nowrap"}} title={mm.label}>
@@ -498,7 +498,7 @@ export default function App(){
       </div>}
       {/* Visual area */}
       {multiMode==="enkel" ? (
-        <div style={{flex:1,display:"flex",justifyContent:"center",alignItems:"center",minHeight:0}}>
+        <div style={{flex:1,display:"flex",justifyContent:"center",alignItems:isMobile?"flex-start":"center",minHeight:0}}>
           <div ref={wheelRef} style={{width:"100%",maxWidth:vizMode==="wheel"?"min(calc(100vh - 220px),840px)":"840px",maxHeight:vizMode==="wheel"?"calc(100vh - 220px)":undefined,display:"flex",justifyContent:"center",flexDirection:"column",alignItems:"center"}}>
             {vizMode==="wheel" ? (
               <Wheel days={days} highlightIdx={drawerDay!==null?drawerDay:hl} centerText={center} filterPerson={fP} filterLoc={fL} filterCat={fC} onDayClick={i=>{setMultiMode("enkel");setDrawerDay(drawerDay===i?null:i);}}/>
