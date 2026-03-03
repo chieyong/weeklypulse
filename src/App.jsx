@@ -383,10 +383,10 @@ export default function App(){
   const chip=(active,color)=>({fontSize:".66rem",padding:"2px 10px",borderRadius:14,border:"1.5px solid "+(active?color:"rgba(61,46,31,.15)"),background:active?color:"transparent",color:active?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"});
   const displayCats=multiMode==="allen"?[...new Set(order.flatMap(id=>members[id]?.categories||[]))]:cats;
 
-  return (<div onClick={()=>{if(colorPick)setColorPick(null);}} style={{background:"#FDF6EE",minHeight:"100vh",fontFamily:"Nunito,sans-serif",color:"#3D2E1F"}}>
+  return (<div onClick={()=>{if(colorPick)setColorPick(null);}} style={{background:"#FDF6EE",minHeight:"100vh",width:"100%",boxSizing:"border-box",fontFamily:"Nunito,sans-serif",color:"#3D2E1F"}}>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-    <style>{`html,body{overflow-x:hidden;}@media(max-width:800px){.wk-wheel{position:static!important;max-width:100%!important;width:100%!important;margin:0 auto 12px;padding:0!important;}.wk-wheel svg{max-width:100%!important;width:100%!important;}.wk-edit-btn button{width:30px!important;height:30px!important;}.wk-edit-btn svg{width:14px!important;height:14px!important;}.wk-pin{width:22px!important;height:22px!important;font-size:.7rem!important;}}@keyframes fadeIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.snap-scroll::-webkit-scrollbar{display:none}@media(max-width:800px){.wk-outer{padding:20px 10px 40px!important;}}`}</style>
-    <div className="wk-outer" style={{maxWidth:1400,margin:"0 auto",padding:"36px 24px 60px",position:"relative"}}>
+    <style>{`*{box-sizing:border-box;}html,body,#root{width:100%;min-height:100vh;margin:0;padding:0;background:#FDF6EE;overflow-x:hidden;}@media(max-width:800px){.wk-wheel{position:static!important;max-width:100%!important;width:100%!important;margin:0 auto 12px;padding:0!important;}.wk-wheel svg{max-width:100%!important;width:100%!important;}.wk-edit-btn button{width:30px!important;height:30px!important;}.wk-edit-btn svg{width:14px!important;height:14px!important;}.wk-pin{width:22px!important;height:22px!important;font-size:.7rem!important;}}@keyframes fadeIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.snap-scroll::-webkit-scrollbar{display:none}@media(max-width:800px){.wk-outer{padding:20px 10px 40px!important;}}`}</style>
+    <div className="wk-outer" style={{width:"100%",padding:"36px 24px 60px",position:"relative"}}>
       <div style={{position:"absolute",top:36,right:24,zIndex:10,display:"flex",gap:6,alignItems:"center"}} className="wk-edit-btn">
         <button onClick={exportSVG} style={{width:36,height:36,borderRadius:"50%",border:"none",background:"transparent",color:"#8A7560",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .3s",opacity:.5}} title="Export as SVG">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12v2a1 1 0 001 1h10a1 1 0 001-1v-2"/><path d="M9 3v9"/><path d="M5.5 8.5L9 12l3.5-3.5"/></svg>
@@ -518,4 +518,3 @@ export default function App(){
     </div>}
   </div>);
 }
-
