@@ -400,7 +400,7 @@ export default function App(){
           {tabEdit?"\u2713":<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><line x1="3" y1="5" x2="15" y2="5"/><line x1="3" y1="9" x2="15" y2="9"/><line x1="3" y1="13" x2="15" y2="13"/><circle cx="6" cy="5" r="1.5" fill="currentColor"/><circle cx="11" cy="9" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/></svg>}
         </button>
       </div>
-      <div ref={titleRef} style={{textAlign:"center",marginBottom:6}}>
+      <div ref={titleRef} style={{textAlign:"center",marginBottom:isMobile?14:18}}>
         {tabEdit?(<input value={pageTitle} onChange={e=>setPageTitle(e.target.value)} style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(2rem,5vw,3rem)",fontWeight:700,letterSpacing:"-.02em",marginBottom:4,border:"none",borderBottom:"2px dashed #C75D3A",background:"transparent",textAlign:"center",outline:"none",color:"#3D2E1F",width:"80%",maxWidth:500}}/>):(<h1 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(2rem,5vw,3rem)",fontWeight:700,letterSpacing:"-.02em",marginBottom:4}}>{pageTitle}</h1>)}
       </div>
       {/* Sticky navbar */}
@@ -437,7 +437,7 @@ export default function App(){
       </div>}
       {/* Controls — desktop: two rows | mobile: one compact row */}
       {isMobile ? (
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5,marginBottom:4,flexWrap:"nowrap",padding:"0 4px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5,rowGap:6,marginBottom:4,flexWrap:"wrap",padding:"0 4px"}}>
           <select value={multiMode==="allen"?"__all__":member} onChange={e=>{const v=e.target.value;if(v==="__all__"){setMultiMode("allen");setFP(null);setFL(null);setFC(null);}else if(multiMode==="alleWeken"){setMember(v);setFP(null);setFL(null);setFC(null);}else{setMember(v);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);setViewSnap(null);}}} style={{fontFamily:"Nunito",fontSize:".62rem",fontWeight:700,padding:"4px 26px 4px 10px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",flexShrink:1,minWidth:0,maxWidth:132,backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 8px center"}} title="Choose persona">
             {order.map(id=>{const mm=members[id];if(!mm)return null;return <option key={id} value={id}>{mm.emoji} {mm.label}</option>;})}
             {order.length>1&&<option value="__all__">All</option>}
@@ -447,6 +447,7 @@ export default function App(){
             {memberSnaps.map(snap=><option key={snap.id} value={snap.id}>{snap.label}</option>)}
             {memberSnaps.length>0&&<option value="__allweeks__">All weeks</option>}
           </select>
+          <button onClick={saveSnapshot} style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".75rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save week">📌</button>
           <div style={{display:"flex",gap:0,borderRadius:20,overflow:"hidden",border:"1.5px solid rgba(61,46,31,.12)",flexShrink:0}}>
             <button onClick={()=>setVizMode("wheel")} title="Wheel" style={{padding:"4px 9px",border:"none",background:vizMode==="wheel"?"#3D2E1F":"transparent",color:vizMode==="wheel"?"#FDF6EE":"#8A7560",cursor:"pointer",transition:"all .2s",lineHeight:1,display:"flex",alignItems:"center"}}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="22"/><line x1="2" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22" y2="12"/></svg>
@@ -455,8 +456,7 @@ export default function App(){
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
           </div>
-          <button onClick={saveSnapshot} style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".75rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save week">📌</button>
-          <button onClick={()=>setTabEdit(!tabEdit)} style={{width:26,height:26,borderRadius:"50%",border:"none",background:tabEdit?"#C75D3A":"transparent",color:tabEdit?"white":"#8A7560",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s",opacity:tabEdit?1:.7,flexShrink:0}} title="Edit personas & weeks">
+          <button onClick={()=>setTabEdit(!tabEdit)} style={{width:26,height:26,borderRadius:"50%",border:"1px solid rgba(61,46,31,.16)",background:tabEdit?"#C75D3A":"#F7EFE6",color:tabEdit?"white":"#8A7560",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s",opacity:1,flexShrink:0}} title="Edit personas & weeks">
             {tabEdit?"✓":<svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><line x1="3" y1="5" x2="15" y2="5"/><line x1="3" y1="9" x2="15" y2="9"/><line x1="3" y1="13" x2="15" y2="13"/><circle cx="6" cy="5" r="1.5" fill="currentColor"/><circle cx="11" cy="9" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/></svg>}
           </button>
         </div>
@@ -483,12 +483,12 @@ export default function App(){
               <button onClick={()=>{setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+(multiMode==="enkel"&&!viewSnap?"#3D2E1F":"rgba(61,46,31,.12)"),background:multiMode==="enkel"&&!viewSnap?"#3D2E1F":"transparent",color:multiMode==="enkel"&&!viewSnap?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>Live</button>
               <div style={{width:1,height:16,background:"#D4C4B0",margin:"0 4px",flexShrink:0}}/>
             </>)}
+            <button onClick={saveSnapshot} style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save this week">📌</button>
             <div style={{display:"flex",gap:0,borderRadius:20,overflow:"hidden",border:"1.5px solid rgba(61,46,31,.12)",flexShrink:0}}>
               <button onClick={()=>setVizMode("wheel")} style={{fontSize:".62rem",padding:"4px 14px",border:"none",background:vizMode==="wheel"?"#3D2E1F":"transparent",color:vizMode==="wheel"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Wheel</button>
               <button onClick={()=>setVizMode("timeline")} style={{fontSize:".62rem",padding:"4px 14px",border:"none",borderLeft:"1px solid rgba(61,46,31,.1)",background:vizMode==="timeline"?"#3D2E1F":"transparent",color:vizMode==="timeline"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Timeline</button>
             </div>
-            <button onClick={saveSnapshot} style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save this week">📌</button>
-            <button onClick={()=>setTabEdit(!tabEdit)} style={{width:28,height:28,borderRadius:"50%",border:"none",background:tabEdit?"#C75D3A":"transparent",color:tabEdit?"white":"#8A7560",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s",opacity:tabEdit?1:.7,flexShrink:0}} title="Edit personas & weeks">
+            <button onClick={()=>setTabEdit(!tabEdit)} style={{width:28,height:28,borderRadius:"50%",border:"1px solid rgba(61,46,31,.16)",background:tabEdit?"#C75D3A":"#F7EFE6",color:tabEdit?"white":"#8A7560",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s",opacity:1,flexShrink:0}} title="Edit personas & weeks">
               {tabEdit?"✓":<svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><line x1="3" y1="5" x2="15" y2="5"/><line x1="3" y1="9" x2="15" y2="9"/><line x1="3" y1="13" x2="15" y2="13"/><circle cx="6" cy="5" r="1.5" fill="currentColor"/><circle cx="11" cy="9" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/></svg>}
             </button>
           </div>
