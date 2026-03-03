@@ -460,6 +460,9 @@ export default function App(){
             </button>
           </div>
           <button onClick={saveSnapshot} style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".75rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save week">📌</button>
+          <button onClick={()=>setTabEdit(!tabEdit)} style={{width:26,height:26,borderRadius:"50%",border:"none",background:tabEdit?"#C75D3A":"transparent",color:tabEdit?"white":"#8A7560",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s",opacity:tabEdit?1:.7,flexShrink:0}} title="Edit personas & weeks">
+            {tabEdit?"✓":<svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><line x1="3" y1="5" x2="15" y2="5"/><line x1="3" y1="9" x2="15" y2="9"/><line x1="3" y1="13" x2="15" y2="13"/><circle cx="6" cy="5" r="1.5" fill="currentColor"/><circle cx="11" cy="9" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/></svg>}
+          </button>
         </div>
       ) : (
         <>
@@ -489,6 +492,9 @@ export default function App(){
               <button onClick={()=>setVizMode("timeline")} style={{fontSize:".62rem",padding:"4px 14px",border:"none",borderLeft:"1px solid rgba(61,46,31,.1)",background:vizMode==="timeline"?"#3D2E1F":"transparent",color:vizMode==="timeline"?"#FDF6EE":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"}}>Timeline</button>
             </div>
             <button onClick={saveSnapshot} style={{width:28,height:28,borderRadius:"50%",border:"1.5px solid rgba(61,46,31,.1)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save this week">📌</button>
+            <button onClick={()=>setTabEdit(!tabEdit)} style={{width:28,height:28,borderRadius:"50%",border:"none",background:tabEdit?"#C75D3A":"transparent",color:tabEdit?"white":"#8A7560",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s",opacity:tabEdit?1:.7,flexShrink:0}} title="Edit personas & weeks">
+              {tabEdit?"✓":<svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><line x1="3" y1="5" x2="15" y2="5"/><line x1="3" y1="9" x2="15" y2="9"/><line x1="3" y1="13" x2="15" y2="13"/><circle cx="6" cy="5" r="1.5" fill="currentColor"/><circle cx="11" cy="9" r="1.5" fill="currentColor"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/></svg>}
+            </button>
           </div>
         </>
       )}
