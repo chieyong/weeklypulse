@@ -617,6 +617,83 @@ function OnboardingWizard({ onComplete }) {
 }
 
 
+
+// ─── Supabase data helpers ───────────────────────────────────────────────────
+
+async function dbSaveProfile(userId, pageTitle) {
+  const { error } = await supabase.from('profiles')
+    .upsert({ id: userId, page_title: pageTitle }, { onConflict: 'id' });
+  if (error) console.error('Save profile error:', error);
+  else console.log('Profile saved');
+}
+
+async function dbSaveMembers(userId, members, order) {
+  const rows = order.map((id, i) => {
+    const m = members[id];
+    return { id, user_id: userId, emoji: m.emoji, label: m.label, bio: m.bio||"", order_index: i, categories: m.categories };
+  });
+  const { error } = await supabase.from('members')
+    .upsert(rows, { onConflict: 'id' });
+  if (error) console.error('Save members error:', error);
+  else console.log('Members saved:', rows.map(r=>r.label));
+}
+
+async function dbSaveDays(memberId, days) {
+  const rows = days.map((d, i) => ({ member_id: memberId, day_index: i, activities: d.activities, happiness: d.happiness, updated_at: new Date().toISOString() }));
+  await supabase.from('days').delete().eq('member_id', memberId);
+  const { error } = await supabase.from('days').insert(rows);
+  if (error) console.error('Save days error:', error);
+}
+
+async function dbSaveSnapshot(memberId, snap) {
+  await supabase.from('snapshots')
+    .upsert({ id: snap.id, member_id: memberId, monday: snap.monday, label: snap.label, days: snap.days, categories: snap.categories, saved_at: snap.savedAt }, { onConflict: 'id' });
+}
+
+async function dbDeleteSnapshot(snapId) {
+  await supabase.from('snapshots').delete().eq('id', snapId);
+}
+
+async function dbDeleteMember(memberId) {
+  await supabase.from('members').delete().eq('id', memberId);
+}
+
+async function dbLoadAll(userId) {
+  const { data: profile, error: pErr } = await supabase.from('profiles').select('*').eq('id', userId).single();
+  if (pErr && pErr.code !== 'PGRST116') console.error('Profile load error:', pErr);
+  const { data: memberRows, error: mErr } = await supabase.from('members').select('*').eq('user_id', userId).order('order_index');
+  if (mErr) console.error('Members load error:', mErr);
+  if (!memberRows || memberRows.length === 0) return null;
+
+  const members = {};
+  const order = [];
+  for (const row of memberRows) {
+    const { data: dayRows } = await supabase.from('days').select('*').eq('member_id', row.id).order('day_index');
+    const { data: snapRows } = await supabase.from('snapshots').select('*').eq('member_id', row.id).order('monday');
+
+    const DAY_NAMES = [["Monday","Mo",false],["Tuesday","Tu",false],["Wednesday","We",false],["Thursday","Th",false],["Friday","Fr",false],["Saturday","Sa",true],["Sunday","Su",true]];
+    const days = (dayRows||[]).map((d,i) => ({ name: DAY_NAMES[i][0], short: DAY_NAMES[i][1], isWeekend: DAY_NAMES[i][2], activities: d.activities||[], happiness: d.happiness||[.5,.5,.5,.5] }));
+
+    members[row.id] = {
+      emoji: row.emoji, label: row.label, centerText: [row.label],
+      bio: row.bio||"", categories: row.categories||["work","leisure"],
+      days: days.length === 7 ? days : clone(INIT_MEMBERS["ik"].days),
+    };
+    order.push(row.id);
+  }
+
+  const { data: allSnaps } = await supabase.from('snapshots').select('*').in('member_id', order).order('monday');
+  const snapshots = {};
+  (allSnaps||[]).forEach(s => {
+    if (!snapshots[s.member_id]) snapshots[s.member_id] = [];
+    snapshots[s.member_id].push({ id: s.id, monday: s.monday, label: s.label, days: s.days, categories: s.categories, savedAt: s.saved_at });
+  });
+
+  return { profile, members, order, snapshots };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function WeeklyPulse(){
   const session = useAuth();
   const handleLogin = async () => { await supabase.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: window.location.origin } }); };
@@ -624,25 +701,45 @@ function WeeklyPulse(){
   const [onboarding, setOnboarding] = useState(false);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
 
-  // Check if first-time login
+  const [dbLoaded, setDbLoaded] = useState(false);
+
+  // Load data on login
   useEffect(() => {
     if (!session || onboardingChecked) return;
-    const key = "wp_onboarded_" + session.user.id;
-    if (!localStorage.getItem(key)) {
-      setOnboarding(true);
-    }
     setOnboardingChecked(true);
+    dbLoadAll(session.user.id).then(result => {
+      console.log('dbLoadAll result:', result);
+      if (!result) {
+        // First time — show onboarding
+        console.log('No data found, showing onboarding');
+        setOnboarding(true);
+      } else {
+        // Load existing data
+        console.log('Loading existing data:', result.order, result.members);
+        setMembers(result.members);
+        setOrder(result.order);
+        setMember(result.order[0]);
+        if (result.profile?.page_title) setPageTitle(result.profile.page_title);
+        if (result.snapshots) setSnapshots(result.snapshots);
+        setDbLoaded(true);
+      }
+    });
   }, [session, onboardingChecked]);
 
-  const handleOnboardingComplete = ({ members: newMembers, order: newOrder, pageTitle: newTitle }) => {
+  const handleOnboardingComplete = async ({ members: newMembers, order: newOrder, pageTitle: newTitle }) => {
     setMembers(newMembers);
     setOrder(newOrder);
     setMember(newOrder[0]);
     setPageTitle(newTitle);
-    const key = "wp_onboarded_" + session.user.id;
-    localStorage.setItem(key, "1");
     setSticky(false);
     setOnboarding(false);
+    setDbLoaded(true);
+    // Save to Supabase
+    await dbSaveProfile(session.user.id, newTitle);
+    await dbSaveMembers(session.user.id, newMembers, newOrder);
+    for (const id of newOrder) {
+      await dbSaveDays(id, newMembers[id].days);
+    }
   };
 
   const[members,setMembers]=useState(()=>clone(INIT_MEMBERS));
@@ -680,6 +777,21 @@ function WeeklyPulse(){
   const titleRef=useRef(null);
   useEffect(()=>{const el=titleRef.current;if(!el)return;const obs=new IntersectionObserver(([e])=>setSticky(!e.isIntersecting),{threshold:0,rootMargin:"-1px 0px 0px 0px"});obs.observe(el);return()=>obs.disconnect();},[onboarding]);
 
+  // Auto-save members+days when data changes (debounced 2s)
+  const saveTimerRef = useRef(null);
+  useEffect(() => {
+    if (!session || !dbLoaded) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      await dbSaveProfile(session.user.id, pageTitle);
+      await dbSaveMembers(session.user.id, members, order);
+      for (const id of order) {
+        if (members[id]) await dbSaveDays(id, members[id].days);
+      }
+    }, 2000);
+    return () => clearTimeout(saveTimerRef.current);
+  }, [members, order, pageTitle, session, dbLoaded]);
+
   const addCategory=()=>{const id="cat_"+Date.now();setColors(prev=>({...prev,[id]:PALETTE[Object.keys(prev).length%PALETTE.length]}));setLabels(prev=>({...prev,[id]:"New"}));setColorPick(id);};
   const removeCategory=(catId)=>{if(Object.keys(labels).length<=2)return;setColors(prev=>{const n={...prev};delete n[catId];return n;});setLabels(prev=>{const n={...prev};delete n[catId];return n;});const fallback=Object.keys(labels).find(k=>k!==catId);if(fallback){setMembers(prev=>{const n=clone(prev);Object.values(n).forEach(m=>{m.days.forEach(d=>{d.activities.forEach(a=>{if(a.cat===catId)a.cat=fallback;});});});return n;});}if(colorPick===catId)setColorPick(null);};
 
@@ -694,12 +806,12 @@ function WeeklyPulse(){
   },[member,viewSnap]);
 
   const addMember=(id,data)=>{setMembers(prev=>({...prev,[id]:data}));setOrder(prev=>[...prev,id]);setMember(id);setFP(null);setFL(null);setFC(null);setViewSnap(null);};
-  const removeMember=(id)=>{if(order.length<=1)return;const idx=order.indexOf(id);const backup=clone(members[id]);const nw=order.filter(x=>x!==id);setMembers(prev=>{const n=clone(prev);delete n[id];return n;});setOrder(nw);if(member===id){setMember(nw[0]);setViewSnap(null);}if(undo&&undo.timer)clearTimeout(undo.timer);const timer=setTimeout(()=>setUndo(null),8000);setUndo({id,data:backup,orderIdx:idx,timer});};
+  const removeMember=(id)=>{if(order.length<=1)return;const idx=order.indexOf(id);const backup=clone(members[id]);const nw=order.filter(x=>x!==id);setMembers(prev=>{const n=clone(prev);delete n[id];return n;});setOrder(nw);if(member===id){setMember(nw[0]);setViewSnap(null);}if(undo&&undo.timer)clearTimeout(undo.timer);const timer=setTimeout(()=>{setUndo(null);if(session&&dbLoaded)dbDeleteMember(id);},8000);setUndo({id,data:backup,orderIdx:idx,timer});};
   const doUndo=()=>{if(!undo)return;clearTimeout(undo.timer);setMembers(prev=>({...prev,[undo.id]:undo.data}));setOrder(prev=>{const n=[...prev];n.splice(undo.orderIdx,0,undo.id);return n;});setMember(undo.id);setUndo(null);};
   const renameMember=(id,newName)=>{setMembers(prev=>{const n=clone(prev);n[id].label=newName;n[id].centerText=[newName];return n;});};
-  const saveSnapshot=()=>{const mon=getMonday();const snap={id:"snap_"+Date.now(),monday:toDateStr(mon),label:fmtMonday(mon),days:clone(m.days),categories:clone(m.categories),savedAt:new Date().toISOString()};setSnapshots(prev=>{const next=clone(prev);if(!next[member])next[member]=[];next[member].push(snap);next[member].sort((a,b)=>a.monday.localeCompare(b.monday));return next;});};
+  const saveSnapshot=()=>{const mon=getMonday();const snap={id:"snap_"+Date.now(),monday:toDateStr(mon),label:fmtMonday(mon),days:clone(m.days),categories:clone(m.categories),savedAt:new Date().toISOString()};setSnapshots(prev=>{const next=clone(prev);if(!next[member])next[member]=[];next[member].push(snap);next[member].sort((a,b)=>a.monday.localeCompare(b.monday));return next;});if(session&&dbLoaded)dbSaveSnapshot(member,snap);};
   const updateSnapDate=(snapId,newDateStr)=>{const dt=new Date(newDateStr);const day=dt.getDay();if(day!==1){const diff=dt.getDate()-day+(day===0?-6:1);dt.setDate(diff);}setSnapshots(prev=>{const next=clone(prev);const arr=next[member]||[];const si=arr.findIndex(s=>s.id===snapId);if(si>=0){arr[si].monday=toDateStr(dt);arr[si].label=fmtMonday(dt);}arr.sort((a,b)=>a.monday.localeCompare(b.monday));return next;});};
-  const deleteSnapshot=(snapId)=>{setSnapshots(prev=>{const next=clone(prev);next[member]=(next[member]||[]).filter(s=>s.id!==snapId);return next;});if(viewSnap===snapId)setViewSnap(null);};
+  const deleteSnapshot=(snapId)=>{setSnapshots(prev=>{const next=clone(prev);next[member]=(next[member]||[]).filter(s=>s.id!==snapId);return next;});if(viewSnap===snapId)setViewSnap(null);if(session&&dbLoaded)dbDeleteSnapshot(snapId);};
 
   const allP=[...new Set(days.flatMap(d=>d.activities.flatMap(a=>a.with||[])))];
   const allL=[...new Set(days.flatMap(d=>d.activities.map(a=>a.loc)).filter(Boolean))];
