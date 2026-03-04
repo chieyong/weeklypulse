@@ -266,7 +266,7 @@ function DayCard({day,dayIdx,onUpdate,onHover,onPin,highlighted,dimmed,globalEdi
           <div style={{display:"flex",alignItems:"center",gap:4}}>
             <span style={{fontSize:".58rem",color:"#8A7560",width:52,flexShrink:0}}>Location</span>
             {addingLoc===j?(<input autoFocus value={newLocVal} onChange={e=>setNewLocVal(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&newLocVal.trim()){uA(j,{...act,loc:newLocVal.trim()});setAddingLoc(null);setNewLocVal("");}if(e.key==="Escape"){setAddingLoc(null);setNewLocVal("");}}} onBlur={()=>{setAddingLoc(null);setNewLocVal("");}} placeholder="New location..." style={{flex:1,border:"none",borderBottom:"1px dashed #C75D3A",background:"transparent",fontSize:".6rem",fontFamily:"Nunito",outline:"none",color:"#3D2E1F",padding:"1px 2px"}}/>):(<div style={{display:"flex",gap:3,flexWrap:"wrap",alignItems:"center"}}>
-              {(allLocs||[]).map(l=>(<button key={l} onClick={()=>uA(j,{...act,loc:l})} style={{fontSize:".54rem",padding:"2px 7px",borderRadius:8,border:"1px solid "+(act.loc===l?"#5B7A6E":"#E8D5C0"),background:act.loc===l?"#5B7A6E":"transparent",color:act.loc===l?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .15s"}}>{l}</button>))}
+              {(allLocs||[]).map(l=>(<button key={l} onClick={()=>uA(j,{...act,loc:l})} style={{fontSize:".54rem",padding:"2px 7px",borderRadius:8,border:"1px solid "+(act.loc===l?"#3D2E1F":"#E8D5C0"),background:act.loc===l?"#3D2E1F":"transparent",color:act.loc===l?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .15s"}}>{l}</button>))}
               <button onClick={()=>{setAddingLoc(j);setNewLocVal("");}} style={{fontSize:".5rem",padding:"2px 5px",borderRadius:8,border:"1px dashed rgba(61,46,31,.15)",background:"transparent",color:"#B8A08A",cursor:"pointer",fontFamily:"Nunito"}}>+</button>
             </div>)}
           </div>
@@ -342,10 +342,10 @@ function useAuth() {
 // Onboarding wizard component to insert before WeeklyPulse
 
 const WORK_OPTIONS = [
-  { key: "office_ft", label: "Fulltime kantoor", emoji: "🏢" },
-  { key: "office_pt", label: "Parttime kantoor", emoji: "🏠" },
+  { key: "office_ft", label: "Full-time office", emoji: "🏢" },
+  { key: "office_pt", label: "Part-time office", emoji: "🏠" },
   { key: "freelancer", label: "Freelancer", emoji: "💻" },
-  { key: "stay_home", label: "Thuisblijfouder", emoji: "🏡" },
+  { key: "stay_home", label: "Stay-at-home parent", emoji: "🏡" },
   { key: "student",   label: "Student",          emoji: "🎓" },
 ];
 
@@ -408,7 +408,7 @@ const OB_inputStyle = {
   outline:"none", boxSizing:"border-box", marginTop:8
 };
 
-const BtnNext = ({ onClick, disabled, label="Volgende →" }) => (
+const BtnNext = ({ onClick, disabled, label="Next →" }) => (
   <button onClick={onClick} disabled={disabled} style={{
     marginTop:24, padding:"12px 28px", borderRadius:14, border:"none",
     background: disabled ? "#E8D5C0" : "#C75D3A",
@@ -433,20 +433,20 @@ const OBProgress = ({ step, total }) => (
 const OBWrap = ({ step, total, children: c }) => (
   <div style={{
     height:"100vh", width:"100vw", background:"#FDF6EE", position:"fixed", top:0, left:0, zIndex:500,
-    display:"flex", alignItems:"flex-start", justifyContent:"center", fontFamily:"Nunito", padding:"40px 24px", boxSizing:"border-box", overflowY:"auto"
-  }}>
+    display:"block", overflowY:"auto", fontFamily:"Nunito", WebkitOverflowScrolling:"touch"
+  }}><div style={{maxWidth:480, margin:"0 auto", padding:"40px 24px 60px", boxSizing:"border-box"}}>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
     <div style={{ width:"100%", maxWidth:480 }}>
       <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"1.8rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>The Weekly Pulse</h1>
-      <p style={{ fontSize:".75rem", color:"#B8A08A", marginBottom:24 }}>Stap {step} van {total}</p>
+      <p style={{ fontSize:".75rem", color:"#B8A08A", marginBottom:24 }}>Step {step} of {total}</p>
       <OBProgress step={step} total={total} />
       {c}
-    </div>
+    </div></div>
   </div>
 );
 
 const BtnBack = ({ onClick }) => (
-  <button onClick={onClick} style={{ marginTop:24, padding:"12px 20px", borderRadius:14, border:"1.5px solid rgba(61,46,31,.15)", background:"transparent", fontFamily:"Nunito", fontWeight:600, fontSize:".9rem", color:"#8A7560", cursor:"pointer" }}>← Terug</button>
+  <button onClick={onClick} style={{ marginTop:24, padding:"12px 20px", borderRadius:14, border:"1.5px solid rgba(61,46,31,.15)", background:"transparent", fontFamily:"Nunito", fontWeight:600, fontSize:".9rem", color:"#8A7560", cursor:"pointer" }}>← Back</button>
 );
 
 function OnboardingWizard({ onComplete }) {
@@ -524,11 +524,11 @@ function OnboardingWizard({ onComplete }) {
 
   if (step === 1) return (
     <OBWrap step={step} total={totalSteps}>
-      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Wie ben jij?</h2>
-      <p style={{ fontSize:".8rem", color:"#8A7560", marginBottom:16 }}>Kies een emoji en vul je naam in.</p>
+      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Who are you?</h2>
+      <p style={{ fontSize:".8rem", color:"#8A7560", marginBottom:16 }}>Choose an emoji and enter your name.</p>
       <EmojiPicker value={selfEmoji} onChange={setSelfEmoji} />
-      <input value={selfName} onChange={e => setSelfName(e.target.value)} placeholder="Jouw voornaam" style={OB_inputStyle} />
-      <p style={{ fontSize:".8rem", color:"#8A7560", marginTop:20, marginBottom:4 }}>Wat is je werksituatie?</p>
+      <input value={selfName} onChange={e => setSelfName(e.target.value)} placeholder="Your first name" style={OB_inputStyle} />
+      <p style={{ fontSize:".8rem", color:"#8A7560", marginTop:20, marginBottom:4 }}>What is your work situation?</p>
       <WorkPicker value={selfWork} onChange={setSelfWork} />
       <BtnNext onClick={() => setStep(2)} disabled={!canNext1} />
     </OBWrap>
@@ -536,9 +536,9 @@ function OnboardingWizard({ onComplete }) {
 
   if (step === 2) return (
     <OBWrap step={step} total={totalSteps}>
-      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Heb je een partner?</h2>
+      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Do you have a partner?</h2>
       <div style={{ display:"flex", gap:10, marginTop:12, marginBottom:20 }}>
-        {[{v:true,l:"Ja"},{v:false,l:"Nee"}].map(({v,l}) => (
+        {[{v:true,l:"Yes"},{v:false,l:"No"}].map(({v,l}) => (
           <button key={l} onClick={() => setHasPartner(v)} style={{
             flex:1, padding:"12px", borderRadius:12,
             border: hasPartner===v ? "2px solid #C75D3A" : "1.5px solid rgba(61,46,31,.12)",
@@ -550,8 +550,8 @@ function OnboardingWizard({ onComplete }) {
       </div>
       {hasPartner && <>
         <EmojiPicker value={partnerEmoji} onChange={setPartnerEmoji} />
-        <input value={partnerName} onChange={e => setPartnerName(e.target.value)} placeholder="Naam van je partner" style={OB_inputStyle} />
-        <p style={{ fontSize:".8rem", color:"#8A7560", marginTop:20, marginBottom:4 }}>Werksituatie partner?</p>
+        <input value={partnerName} onChange={e => setPartnerName(e.target.value)} placeholder="Your partner's name" style={OB_inputStyle} />
+        <p style={{ fontSize:".8rem", color:"#8A7560", marginTop:20, marginBottom:4 }}>Partner's work situation?</p>
         <WorkPicker value={partnerWork} onChange={setPartnerWork} />
       </>}
       <div style={{ display:"flex", gap:10 }}>
@@ -563,7 +563,7 @@ function OnboardingWizard({ onComplete }) {
 
   if (step === 3) return (
     <OBWrap step={step} total={totalSteps}>
-      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Heb je kinderen?</h2>
+      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Do you have children?</h2>
       <div style={{ display:"flex", gap:8, marginTop:12, marginBottom:20 }}>
         {[0,1,2,3].map(n => (
           <button key={n} onClick={() => handleNumChildren(n)} style={{
@@ -577,11 +577,11 @@ function OnboardingWizard({ onComplete }) {
       </div>
       {children.map((child, i) => (
         <div key={i} style={{ marginBottom:16, padding:"14px", borderRadius:12, background:"rgba(61,46,31,.04)", border:"1px solid rgba(61,46,31,.08)" }}>
-          <p style={{ margin:"0 0 8px", fontWeight:700, fontSize:".8rem", color:"#3D2E1F" }}>Kind {i+1}</p>
+          <p style={{ margin:"0 0 8px", fontWeight:700, fontSize:".8rem", color:"#3D2E1F" }}>Child {i+1}</p>
           <EmojiPicker value={child.emoji} onChange={v => updateChild(i, "emoji", v)} />
-          <input value={child.name} onChange={e => updateChild(i, "name", e.target.value)} placeholder={`Naam kind ${i+1}`} style={OB_inputStyle} />
+          <input value={child.name} onChange={e => updateChild(i, "name", e.target.value)} placeholder={`Child ${i+1} name`} style={OB_inputStyle} />
           <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:10 }}>
-            <label style={{ fontSize:".8rem", color:"#8A7560", flexShrink:0 }}>Leeftijd:</label>
+            <label style={{ fontSize:".8rem", color:"#8A7560", flexShrink:0 }}>Age:</label>
             <input type="number" min={1} max={18} value={child.age} onChange={e => updateChild(i, "age", parseInt(e.target.value)||1)} style={{ ...OB_inputStyle, marginTop:0, width:80 }} />
           </div>
         </div>
@@ -595,20 +595,20 @@ function OnboardingWizard({ onComplete }) {
 
   if (step === 4) return (
     <OBWrap step={step} total={totalSteps}>
-      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Bijna klaar!</h2>
-      <p style={{ fontSize:".8rem", color:"#8A7560", marginBottom:16 }}>Geef je weekoverzicht een naam.</p>
+      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Almost done!</h2>
+      <p style={{ fontSize:".8rem", color:"#8A7560", marginBottom:16 }}>Give your weekly overview a name.</p>
       <input value={title} onChange={e => setTitle(e.target.value)} placeholder="The Weekly Pulse" style={OB_inputStyle} />
       <div style={{ marginTop:20, padding:"14px", borderRadius:12, background:"rgba(61,46,31,.04)", border:"1px solid rgba(61,46,31,.08)" }}>
-        <p style={{ margin:"0 0 10px", fontWeight:700, fontSize:".8rem", color:"#3D2E1F" }}>Jouw huishouden:</p>
+        <p style={{ margin:"0 0 10px", fontWeight:700, fontSize:".8rem", color:"#3D2E1F" }}>Your household:</p>
         <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
           <div style={{ fontSize:".85rem", color:"#3D2E1F" }}>{selfEmoji} <strong>{selfName}</strong> — {WORK_OPTIONS.find(w=>w.key===selfWork)?.label}</div>
           {hasPartner && <div style={{ fontSize:".85rem", color:"#3D2E1F" }}>{partnerEmoji} <strong>{partnerName}</strong> — {WORK_OPTIONS.find(w=>w.key===partnerWork)?.label}</div>}
-          {children.map((c,i) => <div key={i} style={{ fontSize:".85rem", color:"#3D2E1F" }}>{c.emoji} <strong>{c.name}</strong> — {c.age} jaar</div>)}
+          {children.map((c,i) => <div key={i} style={{ fontSize:".85rem", color:"#3D2E1F" }}>{c.emoji} <strong>{c.name}</strong> — {c.age} years old</div>)}
         </div>
       </div>
       <div style={{ display:"flex", gap:10 }}>
 <BtnBack onClick={() => setStep(3)} />
-        <BtnNext onClick={handleComplete} disabled={false} label="Aan de slag →" />
+        <BtnNext onClick={handleComplete} disabled={false} label="Get started →" />
       </div>
     </OBWrap>
   );
@@ -623,8 +623,6 @@ function OnboardingWizard({ onComplete }) {
 async function dbSaveProfile(userId, pageTitle) {
   const { error } = await supabase.from('profiles')
     .upsert({ id: userId, page_title: pageTitle }, { onConflict: 'id' });
-  if (error) console.error('Save profile error:', error);
-  else console.log('Profile saved');
 }
 
 async function dbSaveMembers(userId, members, order) {
@@ -634,15 +632,12 @@ async function dbSaveMembers(userId, members, order) {
   });
   const { error } = await supabase.from('members')
     .upsert(rows, { onConflict: 'id' });
-  if (error) console.error('Save members error:', error);
-  else console.log('Members saved:', rows.map(r=>r.label));
 }
 
 async function dbSaveDays(memberId, days) {
   const rows = days.map((d, i) => ({ member_id: memberId, day_index: i, activities: d.activities, happiness: d.happiness, updated_at: new Date().toISOString() }));
   await supabase.from('days').delete().eq('member_id', memberId);
   const { error } = await supabase.from('days').insert(rows);
-  if (error) console.error('Save days error:', error);
 }
 
 async function dbSaveSnapshot(memberId, snap) {
@@ -659,10 +654,8 @@ async function dbDeleteMember(memberId) {
 }
 
 async function dbLoadAll(userId) {
-  const { data: profile, error: pErr } = await supabase.from('profiles').select('*').eq('id', userId).single();
-  if (pErr && pErr.code !== 'PGRST116') console.error('Profile load error:', pErr);
-  const { data: memberRows, error: mErr } = await supabase.from('members').select('*').eq('user_id', userId).order('order_index');
-  if (mErr) console.error('Members load error:', mErr);
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+  const { data: memberRows } = await supabase.from('members').select('*').eq('user_id', userId).order('order_index');
   if (!memberRows || memberRows.length === 0) return null;
 
   const members = {};
@@ -697,7 +690,16 @@ async function dbLoadAll(userId) {
 function WeeklyPulse(){
   const session = useAuth();
   const handleLogin = async () => { await supabase.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: window.location.origin } }); };
-  const handleLogout = async () => { await supabase.auth.signOut(); };
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setMembers(clone(INIT_MEMBERS));
+    setOrder(["ik","partner","son","daughter"]);
+    setMember("ik");
+    setPageTitle("The Weekly Pulse");
+    setSnapshots({});
+    setDbLoaded(false);
+    setOnboardingChecked(false);
+  };
   const [onboarding, setOnboarding] = useState(false);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
 
@@ -708,14 +710,11 @@ function WeeklyPulse(){
     if (!session || onboardingChecked) return;
     setOnboardingChecked(true);
     dbLoadAll(session.user.id).then(result => {
-      console.log('dbLoadAll result:', result);
       if (!result) {
         // First time — show onboarding
-        console.log('No data found, showing onboarding');
         setOnboarding(true);
       } else {
         // Load existing data
-        console.log('Loading existing data:', result.order, result.members);
         setMembers(result.members);
         setOrder(result.order);
         setMember(result.order[0]);
@@ -762,7 +761,15 @@ function WeeklyPulse(){
     const result={};const today=new Date();
     ["ik","partner","son","daughter"].forEach(id=>{const m=INIT_MEMBERS[id];if(!m)return;result[id]=[];for(let w=1;w<=3;w++){const dt=new Date(today);dt.setDate(dt.getDate()-w*7);const mon=getMonday(dt);result[id].push({id:"snap_init_"+id+"_"+w,monday:toDateStr(mon),label:fmtMonday(mon),days:vary(m.days),categories:clone(m.categories),savedAt:new Date(mon.getTime()+86400000).toISOString()});}result[id].reverse();});
     return result;});
-  const[viewSnap,setViewSnap]=useState(null);
+  const[viewSnap,setViewSnap]=useState(()=>{
+    // For demo: pre-select most recent snapshot
+    const demoSnaps = (() => {
+      const result={};const today=new Date();
+      ["ik"].forEach(id=>{const m=INIT_MEMBERS[id];if(!m)return;result[id]=[];for(let w=1;w<=3;w++){const dt=new Date(today);dt.setDate(dt.getDate()-w*7);const mon=getMonday(dt);result[id].push({id:"snap_init_"+id+"_"+w});};result[id].reverse();});
+      return result;
+    })();
+    return demoSnaps["ik"]?.[demoSnaps["ik"].length-1]?.id || null;
+  });
   const[viewSnapMonday,setViewSnapMonday]=useState(null);
   const[colors,setColors]=useState(()=>({...COLORS}));
   const[labels,setLabels]=useState(()=>({...CAT_LABELS}));
@@ -824,7 +831,7 @@ function WeeklyPulse(){
   if (onboarding) return <OnboardingWizard onComplete={handleOnboardingComplete} />;
   return (<div onClick={()=>{if(colorPick)setColorPick(null);}} style={{background:"#FDF6EE",minHeight:"100vh",width:"100%",boxSizing:"border-box",fontFamily:"Nunito,sans-serif",color:"#3D2E1F"}}>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-    <style>{`*{box-sizing:border-box;}html,body,#root{width:100%;min-height:100vh;margin:0;padding:0;background:#FDF6EE;overflow-x:hidden;}@media(max-width:800px){.wk-wheel{position:static!important;max-width:100%!important;width:100%!important;margin:0 auto 12px;padding:0!important;}.wk-wheel svg{max-width:100%!important;width:100%!important;}.wk-edit-btn button{width:24px!important;height:24px!important;font-size:12px!important;}.wk-pin{width:22px!important;height:22px!important;font-size:.7rem!important;}}@keyframes fadeIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.snap-scroll::-webkit-scrollbar{display:none}@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}@media(max-width:800px){.wk-outer{padding:20px 10px 40px!important;}}`}</style>
+    <style>{`*{box-sizing:border-box;}button{outline:none;}button:focus{outline:none;}input:focus{outline:none;}html,body,#root{width:100%;min-height:100vh;margin:0;padding:0;background:#FDF6EE;overflow-x:hidden;}@media(max-width:800px){.wk-wheel{position:static!important;max-width:100%!important;width:100%!important;margin:0 auto 12px;padding:0!important;}.wk-wheel svg{max-width:100%!important;width:100%!important;}.wk-edit-btn button{width:24px!important;height:24px!important;font-size:12px!important;}.wk-pin{width:22px!important;height:22px!important;font-size:.7rem!important;}}@keyframes fadeIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.snap-scroll::-webkit-scrollbar{display:none}@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}@media(max-width:800px){.wk-outer{padding:20px 10px 40px!important;}}`}</style>
     <div className="wk-outer" style={{width:"100%",minHeight:"100vh",display:"flex",flexDirection:"column",padding:"20px 24px 52px",position:"relative"}}>
 
       {/* ── GEAR BUTTON – terracotta achtergrond als edit actief ── */}
@@ -857,13 +864,13 @@ function WeeklyPulse(){
         <div style={{background:"linear-gradient(135deg,#F5EDE3,#EDE0D4)",borderRadius:14,padding:"10px 16px 10px 16px",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap",border:"1px solid rgba(199,93,58,.12)",marginRight:40}}>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             <div>
-              <p style={{margin:0,fontSize:".72rem",fontWeight:700,color:"#3D2E1F",fontFamily:"Nunito"}}>Je bekijkt demo data</p>
-              <p style={{margin:0,fontSize:".65rem",color:"#8A7560",fontFamily:"Nunito",fontWeight:400}}>Log in om eigen data op te slaan</p>
+              <p style={{margin:0,fontSize:".72rem",fontWeight:700,color:"#3D2E1F",fontFamily:"Nunito"}}>You're viewing demo data</p>
+              <p style={{margin:0,fontSize:".65rem",color:"#8A7560",fontFamily:"Nunito",fontWeight:400}}>Log in to save your own data</p>
             </div>
           </div>
           <button onClick={handleLogin} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 14px",borderRadius:20,border:"none",background:"#C75D3A",color:"white",cursor:"pointer",fontFamily:"Nunito",fontWeight:700,fontSize:".68rem",whiteSpace:"nowrap",flexShrink:0}}>
             <svg width="12" height="12" viewBox="0 0 48 48"><path fill="white" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.5 30.2 0 24 0 14.7 0 6.7 5.4 2.7 13.3l7.8 6.1C12.4 13 17.7 9.5 24 9.5z"/><path fill="white" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17z"/><path fill="white" d="M10.5 28.6A14.8 14.8 0 019.5 24c0-1.6.3-3.1.8-4.6l-7.8-6.1A23.9 23.9 0 000 24c0 3.9.9 7.5 2.6 10.7l7.9-6.1z"/><path fill="white" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.6-3.5-13.5-8.3l-7.9 6.1C6.7 42.6 14.7 48 24 48z"/></svg>
-            Inloggen met Google
+            Sign in with Google
           </button>
         </div>
       )}
@@ -892,8 +899,8 @@ function WeeklyPulse(){
           {/* Sticky: week dropdown + delete */}
           {multiMode!=="allen"&&(
             <div style={{display:"flex",alignItems:"center",gap:3}}>
-              <select value={viewSnap||(multiMode==="alleWeken"?"__allweeks__":"__live__")} onChange={e=>{const v=e.target.value;if(v==="__live__"){setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}else if(v==="__allweeks__"){setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);}else{const s=memberSnaps.find(x=>x.id===v);if(s){setViewSnap(s.id);setViewSnapMonday(s.monday);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}}} style={{fontFamily:"Nunito",fontSize:".65rem",fontWeight:600,padding:"4px 28px 4px 12px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 10px center",minWidth:80}}>
-                <option value="__live__">Live</option>
+              <select value={viewSnap||(multiMode==="alleWeken"?"__allweeks__":"__live__")} onChange={e=>{const v=e.target.value;if(v==="__live__"){setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}else if(v==="__allweeks__"){setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);}else{const s=memberSnaps.find(x=>x.id===v);if(s){if(multiMode==="allen"){setViewSnapMonday(s.monday);setFP(null);setFL(null);setFC(null);}else{setViewSnap(s.id);setViewSnapMonday(s.monday);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}}}} style={{fontFamily:"Nunito",fontSize:".65rem",fontWeight:600,padding:"4px 28px 4px 12px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 10px center",minWidth:80}}>
+                <option value="__live__">Current week</option>
                 {memberSnaps.map(s=><option key={s.id} value={s.id}>{s.label}</option>)}
                 {memberSnaps.length>0&&<option value="__allweeks__">All weeks</option>}
               </select>
@@ -933,7 +940,7 @@ function WeeklyPulse(){
           {/* Mobile: week dropdown + delete */}
           <div style={{display:"flex",alignItems:"center",gap:3,flexShrink:1,minWidth:0}}>
             <select value={viewSnap||(multiMode==="alleWeken"?"__allweeks__":"__live__")} onChange={e=>{const v=e.target.value;if(v==="__live__"){setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}else if(v==="__allweeks__"){setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);}else{const snap=memberSnaps.find(x=>x.id===v);if(snap){setViewSnap(snap.id);setViewSnapMonday(snap.monday);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}}} style={{fontFamily:"Nunito",fontSize:".62rem",fontWeight:600,padding:"4px 22px 4px 10px",borderRadius:20,border:"1.5px solid rgba(61,46,31,.12)",background:"transparent",color:"#3D2E1F",cursor:"pointer",outline:"none",appearance:"none",WebkitAppearance:"none",flexShrink:1,minWidth:0,maxWidth:90,backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A7560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 7px center"}}>
-              <option value="__live__">Live</option>
+              <option value="__live__">Current week</option>
               {memberSnaps.map(snap=><option key={snap.id} value={snap.id}>{snap.label}</option>)}
               {memberSnaps.length>0&&<option value="__allweeks__">All weeks</option>}
             </select>
@@ -956,7 +963,7 @@ function WeeklyPulse(){
               {tabEdit&&editMemberName===id?(<div style={{display:"flex",alignItems:"center",background:member===id?"#3D2E1F":"white",borderRadius:16,border:"1.5px solid "+(member===id?"#3D2E1F":"rgba(61,46,31,.12)"),padding:"2px 8px",gap:3}}>
                 <span style={{fontSize:".72rem"}}>{mm.emoji}</span>
                 <input autoFocus value={mm.label} onChange={e=>renameMember(id,e.target.value)} onBlur={()=>setEditMemberName(null)} onKeyDown={e=>{if(e.key==="Enter")setEditMemberName(null);}} style={{width:60,border:"none",borderBottom:"1px dashed "+(member===id?"#FDF6EE60":"#C75D3A"),background:"transparent",fontSize:".68rem",fontFamily:"Nunito",fontWeight:700,outline:"none",color:member===id?"#FDF6EE":"#3D2E1F",padding:0}}/>
-              </div>):(<button onClick={()=>{if(tabEdit&&member===id){setEditMemberName(id);}else if(multiMode==="alleWeken"){setMember(id);setFP(null);setFL(null);setFC(null);}else{setMember(id);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);setViewSnap(null);}}} style={{fontFamily:"Nunito",fontSize:".68rem",fontWeight:700,padding:"3px 12px",borderRadius:16,border:"1.5px solid "+(multiMode!=="allen"&&multiMode!=="alleWeken"&&member===id?"#3D2E1F":multiMode==="alleWeken"&&member===id?"#5B7A6E":"rgba(61,46,31,.12)"),background:multiMode!=="allen"&&multiMode!=="alleWeken"&&member===id?"#3D2E1F":multiMode==="alleWeken"&&member===id?"#5B7A6E":"transparent",color:(multiMode!=="allen"&&member===id&&multiMode!=="alleWeken")||(multiMode==="alleWeken"&&member===id)?"#FDF6EE":"#8A7560",cursor:"pointer",transition:"all .3s",lineHeight:1.3}}>{mm.emoji} {mm.label}{tabEdit&&member===id&&<span style={{marginLeft:3,fontSize:".5rem",opacity:.6}}>{"✎"}</span>}</button>)}
+              </div>):(<button onClick={()=>{if(tabEdit&&member===id){setEditMemberName(id);}else if(multiMode==="alleWeken"){setMember(id);setFP(null);setFL(null);setFC(null);}else{setMember(id);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);setViewSnap(null);}}} style={{fontFamily:"Nunito",fontSize:".68rem",fontWeight:700,padding:"3px 12px",borderRadius:16,border:"1.5px solid "+(multiMode!=="allen"&&multiMode!=="alleWeken"&&member===id?"#3D2E1F":multiMode==="alleWeken"&&member===id?"#3D2E1F":"rgba(61,46,31,.12)"),background:multiMode!=="allen"&&multiMode!=="alleWeken"&&member===id?"#3D2E1F":multiMode==="alleWeken"&&member===id?"#3D2E1F":"transparent",color:(multiMode!=="allen"&&member===id&&multiMode!=="alleWeken")||(multiMode==="alleWeken"&&member===id)?"#FDF6EE":"#8A7560",cursor:"pointer",transition:"all .3s",lineHeight:1.3}}>{mm.emoji} {mm.label}{tabEdit&&member===id&&<span style={{marginLeft:3,fontSize:".5rem",opacity:.6}}>{"✎"}</span>}</button>)}
               {tabEdit&&order.length>1&&<button onClick={e=>{e.stopPropagation();removeMember(id);}} style={{position:"absolute",top:-5,right:-5,width:14,height:14,borderRadius:"50%",border:"1px solid #E0D4C6",background:"white",color:"#C75D3A",fontSize:".5rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Nunito",boxShadow:"0 1px 3px rgba(0,0,0,.1)",animation:"fadeIn .2s ease"}}>x</button>}
             </div>);})}
             {tabEdit&&<button onClick={()=>setShowAdd(true)} style={{width:22,height:22,borderRadius:"50%",border:"1.5px dashed rgba(61,46,31,.15)",background:"transparent",color:"#8A7560",cursor:"pointer",fontSize:".7rem",display:"flex",alignItems:"center",justifyContent:"center",animation:"fadeIn .2s ease"}}>+</button>}
@@ -964,12 +971,12 @@ function WeeklyPulse(){
           </div>
           <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginBottom:10,flexWrap:"wrap"}}>
             {memberSnaps.length>0&&(<>
-              {multiMode!=="allen"&&<button onClick={()=>{if(multiMode==="alleWeken"){setMultiMode("enkel");}else{setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);setFP(null);setFL(null);setFC(null);}}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+(multiMode==="alleWeken"?"#5B7A6E":"rgba(61,46,31,.12)"),background:multiMode==="alleWeken"?"#5B7A6E":"transparent",color:multiMode==="alleWeken"?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>All weeks</button>}
+              {multiMode!=="allen"&&<button onClick={()=>{if(multiMode==="alleWeken"){setMultiMode("enkel");}else{setMultiMode("alleWeken");setViewSnap(null);setViewSnapMonday(null);setFP(null);setFL(null);setFC(null);}}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+(multiMode==="alleWeken"?"#3D2E1F":"rgba(61,46,31,.12)"),background:multiMode==="alleWeken"?"#3D2E1F":"transparent",color:multiMode==="alleWeken"?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>All weeks</button>}
               {memberSnaps.map(snap=>(<div key={snap.id} style={{position:"relative",flexShrink:0}}>
-                {editSnapDate===snap.id?(<input type="date" autoFocus value={snap.monday||""} onChange={e=>updateSnapDate(snap.id,e.target.value)} onBlur={()=>setEditSnapDate(null)} style={{fontSize:".58rem",width:90,padding:"4px 8px",borderRadius:20,border:"1.5px solid #5B7A6E",background:"white",color:"#3D2E1F",fontFamily:"Nunito",outline:"none"}}/>):(<button onClick={()=>{if(tabEdit){setEditSnapDate(snap.id);}else{const n=viewSnap===snap.id?null:snap.id;setViewSnap(n);setViewSnapMonday(n?snap.monday:null);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+(viewSnap===snap.id?"#5B7A6E":"rgba(61,46,31,.12)"),background:viewSnap===snap.id?"#5B7A6E":"transparent",color:viewSnap===snap.id?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>{snap.label}</button>)}
+                {editSnapDate===snap.id?(<input type="date" autoFocus value={snap.monday||""} onChange={e=>updateSnapDate(snap.id,e.target.value)} onBlur={()=>setEditSnapDate(null)} style={{fontSize:".58rem",width:90,padding:"4px 8px",borderRadius:20,border:"1.5px solid #3D2E1F",background:"white",color:"#3D2E1F",fontFamily:"Nunito",outline:"none"}}/>):(<button onClick={()=>{if(tabEdit){setEditSnapDate(snap.id);}else{if(multiMode==="allen"){setViewSnapMonday(snap.monday);setFP(null);setFL(null);setFC(null);}else{const n=viewSnap===snap.id?null:snap.id;setViewSnap(n);setViewSnapMonday(n?snap.monday:null);setMultiMode("enkel");setFP(null);setFL(null);setFC(null);}}}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+((viewSnap===snap.id||(multiMode==="allen"&&viewSnapMonday===snap.monday))?"#3D2E1F":"rgba(61,46,31,.12)"),background:(viewSnap===snap.id||(multiMode==="allen"&&viewSnapMonday===snap.monday))?"#3D2E1F":"transparent",color:(viewSnap===snap.id||(multiMode==="allen"&&viewSnapMonday===snap.monday))?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>{snap.label}</button>)}
                 {tabEdit&&<button onClick={e=>{e.stopPropagation();deleteSnapshot(snap.id);}} style={{position:"absolute",top:-4,right:-4,width:13,height:13,borderRadius:"50%",border:"1px solid #E0D4C6",background:"white",color:"#C75D3A",fontSize:".4rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 1px 2px rgba(0,0,0,.08)"}}>x</button>}
               </div>))}
-              <button onClick={()=>{setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+(multiMode==="enkel"&&!viewSnap?"#3D2E1F":"rgba(61,46,31,.12)"),background:multiMode==="enkel"&&!viewSnap?"#3D2E1F":"transparent",color:multiMode==="enkel"&&!viewSnap?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>Live</button>
+              <button onClick={()=>{setViewSnap(null);setViewSnapMonday(null);setMultiMode("enkel");}} style={{fontSize:".62rem",padding:"4px 12px",borderRadius:20,border:"1.5px solid "+(multiMode==="enkel"&&!viewSnap?"#3D2E1F":"rgba(61,46,31,.12)"),background:multiMode==="enkel"&&!viewSnap?"#3D2E1F":"transparent",color:multiMode==="enkel"&&!viewSnap?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s",whiteSpace:"nowrap"}}>Current week</button>
               <div style={{width:1,height:16,background:"#D4C4B0",margin:"0 4px",flexShrink:0}}/>
             </>)}
             <button onClick={saveSnapshot} style={{width:28,height:28,borderRadius:"50%",border:"none",background:"transparent",color:"#D4C4B0",cursor:"pointer",fontSize:".8rem",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}} title="Save this week">📌</button>
@@ -987,7 +994,7 @@ function WeeklyPulse(){
       {/* Visual area */}
       {multiMode==="enkel" ? (
         <div style={{flex:1,display:"flex",justifyContent:"center",alignItems:isMobile?"flex-start":"center",minHeight:0}}>
-          <div ref={wheelRef} style={{width:"100%",maxWidth:vizMode==="wheel"?("min(calc(100vh - "+(session?"250":"320")+"px),840px)"):"840px",maxHeight:vizMode==="wheel"?("calc(100vh - "+(session?"250":"320")+"px)"):undefined,display:"flex",justifyContent:"center",flexDirection:"column",alignItems:"center"}}>
+          <div ref={wheelRef} style={{width:"100%",maxWidth:vizMode==="wheel"?("min(calc(100vh - "+(session?"250":"320")+"px),840px)"):"840px",maxHeight:vizMode==="wheel"?("calc(100vh - "+(session?"250":"320")+"px)"):("calc(100vh - "+(session?"250":"320")+"px)"),display:"flex",justifyContent:"center",flexDirection:"column",alignItems:"center",overflowY:vizMode==="timeline"?"auto":undefined}}>
             {vizMode==="wheel" ? (
               <Wheel days={days} highlightIdx={drawerDay!==null?drawerDay:hl} centerText={center} filterPerson={fP} filterLoc={fL} filterCat={fC} onDayClick={i=>{setMultiMode("enkel");setDrawerDay(drawerDay===i?null:i);}}/>
             ) : (
@@ -996,12 +1003,11 @@ function WeeklyPulse(){
           </div>
         </div>
       ) : multiMode==="allen" ? (
-        <div style={{flex:1,display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:20,width:"100%",alignContent:"start"}}>
+        <div style={{flex:1,display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(420px,1fr))",gap:24,width:"100%",alignContent:"start"}}>
           {order.map(id=>{const mm=members[id];if(!mm)return null;
             const mSnaps=snapshots[id]||[];const mSnap=viewSnapMonday?mSnaps.find(s=>s.monday===viewSnapMonday):null;
             const mDays=mSnap?mSnap.days:mm.days;const mCats=mSnap?mSnap.categories:mm.categories;const mCenter=mSnap?[mm.centerText[0],mSnap.label]:mm.centerText;
             return (<div key={id} style={{borderRadius:14,padding:12,cursor:"pointer",transition:"all .2s"}} onClick={()=>{setMember(id);setMultiMode("enkel");}}>
-              <div style={{textAlign:"center",marginBottom:4}}><span style={{fontSize:".72rem",fontFamily:"'Playfair Display',serif",fontWeight:700}}>{mm.emoji} {mm.label}</span></div>
               {vizMode==="wheel"?(<Wheel days={mDays} highlightIdx={null} centerText={mCenter} filterPerson={fP} filterLoc={fL} filterCat={fC} onDayClick={i=>{setMember(id);setMultiMode("enkel");setDrawerDay(i);}}/>):(<TimelineChart days={mDays} cats={mCats} highlightIdx={null} filterCat={fC} centerText={mCenter} onDayClick={i=>{setMember(id);setMultiMode("enkel");setDrawerDay(i);}}/>)}
             </div>);
           })}
@@ -1010,11 +1016,9 @@ function WeeklyPulse(){
         <div style={{flex:1,width:"100%",maxWidth:800,margin:"0 auto"}}>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:16}}>
             {memberSnaps.map(s=>(<div key={s.id} style={{borderRadius:14,padding:12,cursor:"pointer",transition:"all .2s"}} onClick={()=>{setViewSnap(s.id);setMultiMode("enkel");}}>
-              <div style={{textAlign:"center",marginBottom:4}}><span style={{fontSize:".72rem",fontFamily:"'Playfair Display',serif",fontWeight:700}}>{s.label}</span></div>
               {vizMode==="wheel"?(<Wheel days={s.days} highlightIdx={null} centerText={[m.centerText[0],s.label]} filterPerson={null} filterLoc={null} filterCat={fC} onDayClick={()=>{}}/>):(<TimelineChart days={s.days} cats={s.categories||m.categories} highlightIdx={null} filterCat={fC} centerText={[m.centerText[0],s.label]} onDayClick={()=>{}}/>)}
             </div>))}
             <div style={{borderRadius:14,padding:12,cursor:"pointer",transition:"all .2s"}} onClick={()=>{setViewSnap(null);setMultiMode("enkel");}}>
-              <div style={{textAlign:"center",marginBottom:4}}><span style={{fontSize:".72rem",fontFamily:"'Playfair Display',serif",fontWeight:700}}>Current</span></div>
               {vizMode==="wheel"?(<Wheel days={m.days} highlightIdx={null} centerText={[m.centerText[0],"Current"]} filterPerson={null} filterLoc={null} filterCat={fC} onDayClick={()=>{}}/>):(<TimelineChart days={m.days} cats={m.categories} highlightIdx={null} filterCat={fC} centerText={[m.centerText[0],"Current"]} onDayClick={()=>{}}/>)}
             </div>
           </div>
