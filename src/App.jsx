@@ -339,10 +339,312 @@ function useAuth() {
   return session;
 }
 
+// Onboarding wizard component to insert before WeeklyPulse
+
+const WORK_OPTIONS = [
+  { key: "office_ft", label: "Fulltime kantoor", emoji: "🏢" },
+  { key: "office_pt", label: "Parttime kantoor", emoji: "🏠" },
+  { key: "freelancer", label: "Freelancer", emoji: "💻" },
+  { key: "stay_home", label: "Thuisblijfouder", emoji: "🏡" },
+  { key: "student",   label: "Student",          emoji: "🎓" },
+];
+
+const AGE_TO_PERSONA = (age) => {
+  if (age <= 3)  return "primary_lower";
+  if (age <= 6)  return "primary_lower";
+  if (age <= 12) return "primary_lower";
+  if (age <= 16) return "primary_upper";
+  return "student";
+};
+
+const CHILD_EMOJIS = ["🧒","👦","👧","🧑"];
+
+function buildMemberFromPersona(id, name, emoji, personaKey) {
+  const persona = PERSONAS[personaKey] || PERSONAS["office_ft"];
+  return {
+    emoji,
+    label: name,
+    centerText: [name],
+    bio: persona.label,
+    categories: clone(persona.categories),
+    days: clone(persona.days),
+  };
+}
+
+const EmojiPicker = ({ value, onChange }) => (
+  <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginTop:8 }}>
+    {EMOJIS.map(e => (
+      <button key={e} onClick={() => onChange(e)} style={{
+        width:36, height:36, borderRadius:10,
+        border: value===e ? "2px solid #C75D3A" : "2px solid transparent",
+        background: value===e ? "#C75D3A20" : "#F5EDE3",
+        fontSize:"1.1rem", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", padding:0
+      }}>{e}</button>
+    ))}
+  </div>
+);
+
+const WorkPicker = ({ value, onChange }) => (
+  <div style={{ display:"flex", flexDirection:"column", gap:8, marginTop:8 }}>
+    {WORK_OPTIONS.map(o => (
+      <button key={o.key} onClick={() => onChange(o.key)} style={{
+        display:"flex", alignItems:"center", gap:10,
+        padding:"10px 14px", borderRadius:12,
+        border: value===o.key ? "2px solid #C75D3A" : "1.5px solid rgba(61,46,31,.12)",
+        background: value===o.key ? "#C75D3A10" : "white",
+        cursor:"pointer", fontFamily:"Nunito", fontSize:".85rem",
+        fontWeight: value===o.key ? 700 : 400, color:"#3D2E1F", textAlign:"left"
+      }}>
+        <span style={{fontSize:"1.1rem"}}>{o.emoji}</span> {o.label}
+      </button>
+    ))}
+  </div>
+);
+
+const OB_inputStyle = {
+  width:"100%", padding:"10px 14px", borderRadius:12,
+  border:"1.5px solid rgba(61,46,31,.15)", background:"white",
+  fontFamily:"Nunito", fontSize:".9rem", color:"#3D2E1F",
+  outline:"none", boxSizing:"border-box", marginTop:8
+};
+
+const BtnNext = ({ onClick, disabled, label="Volgende →" }) => (
+  <button onClick={onClick} disabled={disabled} style={{
+    marginTop:24, padding:"12px 28px", borderRadius:14, border:"none",
+    background: disabled ? "#E8D5C0" : "#C75D3A",
+    color: disabled ? "#B8A08A" : "white",
+    fontFamily:"Nunito", fontWeight:700, fontSize:".9rem",
+    cursor: disabled ? "not-allowed" : "pointer", transition:"all .2s"
+  }}>{label}</button>
+);
+
+const OBProgress = ({ step, total }) => (
+  <div style={{ display:"flex", gap:6, marginBottom:28 }}>
+    {Array.from({ length: total }).map((_, i) => (
+      <div key={i} style={{
+        height:4, flex:1, borderRadius:4,
+        background: i < step ? "#C75D3A" : "rgba(61,46,31,.1)",
+        transition:"background .3s"
+      }}/>
+    ))}
+  </div>
+);
+
+const OBWrap = ({ step, total, children: c }) => (
+  <div style={{
+    height:"100vh", width:"100vw", background:"#FDF6EE", position:"fixed", top:0, left:0, zIndex:500,
+    display:"flex", alignItems:"flex-start", justifyContent:"center", fontFamily:"Nunito", padding:"40px 24px", boxSizing:"border-box", overflowY:"auto"
+  }}>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+    <div style={{ width:"100%", maxWidth:480 }}>
+      <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"1.8rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>The Weekly Pulse</h1>
+      <p style={{ fontSize:".75rem", color:"#B8A08A", marginBottom:24 }}>Stap {step} van {total}</p>
+      <OBProgress step={step} total={total} />
+      {c}
+    </div>
+  </div>
+);
+
+const BtnBack = ({ onClick }) => (
+  <button onClick={onClick} style={{ marginTop:24, padding:"12px 20px", borderRadius:14, border:"1.5px solid rgba(61,46,31,.15)", background:"transparent", fontFamily:"Nunito", fontWeight:600, fontSize:".9rem", color:"#8A7560", cursor:"pointer" }}>← Terug</button>
+);
+
+function OnboardingWizard({ onComplete }) {
+  const [step, setStep] = useState(1);
+
+  // Step 1 — self
+  const [selfName, setSelfName] = useState("");
+  const [selfEmoji, setSelfEmoji] = useState("👤");
+  const [selfWork, setSelfWork] = useState(null);
+
+  // Step 2 — partner
+  const [hasPartner, setHasPartner] = useState(null);
+  const [partnerName, setPartnerName] = useState("");
+  const [partnerEmoji, setPartnerEmoji] = useState("👤");
+  const [partnerWork, setPartnerWork] = useState(null);
+
+  // Step 3 — children
+  const [numChildren, setNumChildren] = useState(0);
+  const [children, setChildren] = useState([]);
+
+  // Step 4 — title
+  const [title, setTitle] = useState("The Weekly Pulse");
+
+  const totalSteps = 4;
+
+  const updateChild = (i, field, val) => {
+    setChildren(prev => {
+      const next = [...prev];
+      next[i] = { ...next[i], [field]: val };
+      return next;
+    });
+  };
+
+  const handleNumChildren = (n) => {
+    setNumChildren(n);
+    setChildren(Array.from({ length: n }, (_, i) => ({
+      name: "", emoji: CHILD_EMOJIS[i] || "🧒", age: 8
+    })));
+  };
+
+  const handleComplete = () => {
+    const members = {};
+    const order = [];
+
+    // Self
+    const selfId = "self";
+    members[selfId] = buildMemberFromPersona(selfId, selfName || "Me", selfEmoji, selfWork || "office_ft");
+    order.push(selfId);
+
+    // Partner
+    if (hasPartner) {
+      const partnerId = "partner";
+      members[partnerId] = buildMemberFromPersona(partnerId, partnerName || "Partner", partnerEmoji, partnerWork || "office_ft");
+      order.push(partnerId);
+    }
+
+    // Children
+    children.forEach((child, i) => {
+      const childId = "child_" + i;
+      const personaKey = AGE_TO_PERSONA(child.age || 8);
+      members[childId] = buildMemberFromPersona(childId, child.name || ("Child " + (i+1)), child.emoji, personaKey);
+      order.push(childId);
+    });
+
+    onComplete({ members, order, pageTitle: title || "The Weekly Pulse" });
+  };
+
+  const canNext1 = selfName.trim().length > 0 && selfWork;
+  const canNext2 = hasPartner === false || (hasPartner && partnerName.trim().length > 0 && partnerWork);
+  const canNext3 = numChildren === 0 || children.every(c => c.name.trim().length > 0);
+
+
+
+
+
+  if (step === 1) return (
+    <OBWrap step={step} total={totalSteps}>
+      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Wie ben jij?</h2>
+      <p style={{ fontSize:".8rem", color:"#8A7560", marginBottom:16 }}>Kies een emoji en vul je naam in.</p>
+      <EmojiPicker value={selfEmoji} onChange={setSelfEmoji} />
+      <input value={selfName} onChange={e => setSelfName(e.target.value)} placeholder="Jouw voornaam" style={OB_inputStyle} />
+      <p style={{ fontSize:".8rem", color:"#8A7560", marginTop:20, marginBottom:4 }}>Wat is je werksituatie?</p>
+      <WorkPicker value={selfWork} onChange={setSelfWork} />
+      <BtnNext onClick={() => setStep(2)} disabled={!canNext1} />
+    </OBWrap>
+  );
+
+  if (step === 2) return (
+    <OBWrap step={step} total={totalSteps}>
+      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Heb je een partner?</h2>
+      <div style={{ display:"flex", gap:10, marginTop:12, marginBottom:20 }}>
+        {[{v:true,l:"Ja"},{v:false,l:"Nee"}].map(({v,l}) => (
+          <button key={l} onClick={() => setHasPartner(v)} style={{
+            flex:1, padding:"12px", borderRadius:12,
+            border: hasPartner===v ? "2px solid #C75D3A" : "1.5px solid rgba(61,46,31,.12)",
+            background: hasPartner===v ? "#C75D3A10" : "white",
+            fontFamily:"Nunito", fontWeight:700, fontSize:".9rem",
+            color:"#3D2E1F", cursor:"pointer"
+          }}>{l}</button>
+        ))}
+      </div>
+      {hasPartner && <>
+        <EmojiPicker value={partnerEmoji} onChange={setPartnerEmoji} />
+        <input value={partnerName} onChange={e => setPartnerName(e.target.value)} placeholder="Naam van je partner" style={OB_inputStyle} />
+        <p style={{ fontSize:".8rem", color:"#8A7560", marginTop:20, marginBottom:4 }}>Werksituatie partner?</p>
+        <WorkPicker value={partnerWork} onChange={setPartnerWork} />
+      </>}
+      <div style={{ display:"flex", gap:10 }}>
+<BtnBack onClick={() => setStep(1)} />
+        <BtnNext onClick={() => setStep(3)} disabled={!canNext2} />
+      </div>
+    </OBWrap>
+  );
+
+  if (step === 3) return (
+    <OBWrap step={step} total={totalSteps}>
+      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Heb je kinderen?</h2>
+      <div style={{ display:"flex", gap:8, marginTop:12, marginBottom:20 }}>
+        {[0,1,2,3].map(n => (
+          <button key={n} onClick={() => handleNumChildren(n)} style={{
+            flex:1, padding:"12px", borderRadius:12,
+            border: numChildren===n ? "2px solid #C75D3A" : "1.5px solid rgba(61,46,31,.12)",
+            background: numChildren===n ? "#C75D3A10" : "white",
+            fontFamily:"Nunito", fontWeight:700, fontSize:".9rem",
+            color:"#3D2E1F", cursor:"pointer"
+          }}>{n === 3 ? "3+" : n}</button>
+        ))}
+      </div>
+      {children.map((child, i) => (
+        <div key={i} style={{ marginBottom:16, padding:"14px", borderRadius:12, background:"rgba(61,46,31,.04)", border:"1px solid rgba(61,46,31,.08)" }}>
+          <p style={{ margin:"0 0 8px", fontWeight:700, fontSize:".8rem", color:"#3D2E1F" }}>Kind {i+1}</p>
+          <EmojiPicker value={child.emoji} onChange={v => updateChild(i, "emoji", v)} />
+          <input value={child.name} onChange={e => updateChild(i, "name", e.target.value)} placeholder={`Naam kind ${i+1}`} style={OB_inputStyle} />
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:10 }}>
+            <label style={{ fontSize:".8rem", color:"#8A7560", flexShrink:0 }}>Leeftijd:</label>
+            <input type="number" min={1} max={18} value={child.age} onChange={e => updateChild(i, "age", parseInt(e.target.value)||1)} style={{ ...OB_inputStyle, marginTop:0, width:80 }} />
+          </div>
+        </div>
+      ))}
+      <div style={{ display:"flex", gap:10 }}>
+<BtnBack onClick={() => setStep(2)} />
+        <BtnNext onClick={() => setStep(4)} disabled={!canNext3} />
+      </div>
+    </OBWrap>
+  );
+
+  if (step === 4) return (
+    <OBWrap step={step} total={totalSteps}>
+      <h2 style={{ fontSize:"1.3rem", fontWeight:700, color:"#3D2E1F", marginBottom:4 }}>Bijna klaar!</h2>
+      <p style={{ fontSize:".8rem", color:"#8A7560", marginBottom:16 }}>Geef je weekoverzicht een naam.</p>
+      <input value={title} onChange={e => setTitle(e.target.value)} placeholder="The Weekly Pulse" style={OB_inputStyle} />
+      <div style={{ marginTop:20, padding:"14px", borderRadius:12, background:"rgba(61,46,31,.04)", border:"1px solid rgba(61,46,31,.08)" }}>
+        <p style={{ margin:"0 0 10px", fontWeight:700, fontSize:".8rem", color:"#3D2E1F" }}>Jouw huishouden:</p>
+        <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+          <div style={{ fontSize:".85rem", color:"#3D2E1F" }}>{selfEmoji} <strong>{selfName}</strong> — {WORK_OPTIONS.find(w=>w.key===selfWork)?.label}</div>
+          {hasPartner && <div style={{ fontSize:".85rem", color:"#3D2E1F" }}>{partnerEmoji} <strong>{partnerName}</strong> — {WORK_OPTIONS.find(w=>w.key===partnerWork)?.label}</div>}
+          {children.map((c,i) => <div key={i} style={{ fontSize:".85rem", color:"#3D2E1F" }}>{c.emoji} <strong>{c.name}</strong> — {c.age} jaar</div>)}
+        </div>
+      </div>
+      <div style={{ display:"flex", gap:10 }}>
+<BtnBack onClick={() => setStep(3)} />
+        <BtnNext onClick={handleComplete} disabled={false} label="Aan de slag →" />
+      </div>
+    </OBWrap>
+  );
+
+  return null;
+}
+
+
 function WeeklyPulse(){
   const session = useAuth();
   const handleLogin = async () => { await supabase.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: window.location.origin } }); };
   const handleLogout = async () => { await supabase.auth.signOut(); };
+  const [onboarding, setOnboarding] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
+
+  // Check if first-time login
+  useEffect(() => {
+    if (!session || onboardingChecked) return;
+    const key = "wp_onboarded_" + session.user.id;
+    if (!localStorage.getItem(key)) {
+      setOnboarding(true);
+    }
+    setOnboardingChecked(true);
+  }, [session, onboardingChecked]);
+
+  const handleOnboardingComplete = ({ members: newMembers, order: newOrder, pageTitle: newTitle }) => {
+    setMembers(newMembers);
+    setOrder(newOrder);
+    setMember(newOrder[0]);
+    setPageTitle(newTitle);
+    const key = "wp_onboarded_" + session.user.id;
+    localStorage.setItem(key, "1");
+    setSticky(false);
+    setOnboarding(false);
+  };
+
   const[members,setMembers]=useState(()=>clone(INIT_MEMBERS));
   const[order,setOrder]=useState(["ik","partner","son","daughter"]);
   const[member,setMember]=useState("ik");
@@ -376,7 +678,7 @@ function WeeklyPulse(){
   const[isMobile,setIsMobile]=useState(()=>typeof window!=="undefined"&&window.innerWidth<=600);
   useEffect(()=>{const h=()=>setIsMobile(window.innerWidth<=600);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);
   const titleRef=useRef(null);
-  useEffect(()=>{const el=titleRef.current;if(!el)return;const obs=new IntersectionObserver(([e])=>setSticky(!e.isIntersecting),{threshold:0,rootMargin:"-1px 0px 0px 0px"});obs.observe(el);return()=>obs.disconnect();},[]);
+  useEffect(()=>{const el=titleRef.current;if(!el)return;const obs=new IntersectionObserver(([e])=>setSticky(!e.isIntersecting),{threshold:0,rootMargin:"-1px 0px 0px 0px"});obs.observe(el);return()=>obs.disconnect();},[onboarding]);
 
   const addCategory=()=>{const id="cat_"+Date.now();setColors(prev=>({...prev,[id]:PALETTE[Object.keys(prev).length%PALETTE.length]}));setLabels(prev=>({...prev,[id]:"New"}));setColorPick(id);};
   const removeCategory=(catId)=>{if(Object.keys(labels).length<=2)return;setColors(prev=>{const n={...prev};delete n[catId];return n;});setLabels(prev=>{const n={...prev};delete n[catId];return n;});const fallback=Object.keys(labels).find(k=>k!==catId);if(fallback){setMembers(prev=>{const n=clone(prev);Object.values(n).forEach(m=>{m.days.forEach(d=>{d.activities.forEach(a=>{if(a.cat===catId)a.cat=fallback;});});});return n;});}if(colorPick===catId)setColorPick(null);};
@@ -407,6 +709,7 @@ function WeeklyPulse(){
   const chip=(active,color)=>({fontSize:".66rem",padding:"2px 10px",borderRadius:14,border:"1.5px solid "+(active?color:"rgba(61,46,31,.15)"),background:active?color:"transparent",color:active?"white":"#8A7560",cursor:"pointer",fontFamily:"Nunito",fontWeight:600,transition:"all .2s"});
   const displayCats=multiMode==="allen"?[...new Set(order.flatMap(id=>members[id]?.categories||[]))]:cats;
 
+  if (onboarding) return <OnboardingWizard onComplete={handleOnboardingComplete} />;
   return (<div onClick={()=>{if(colorPick)setColorPick(null);}} style={{background:"#FDF6EE",minHeight:"100vh",width:"100%",boxSizing:"border-box",fontFamily:"Nunito,sans-serif",color:"#3D2E1F"}}>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
     <style>{`*{box-sizing:border-box;}html,body,#root{width:100%;min-height:100vh;margin:0;padding:0;background:#FDF6EE;overflow-x:hidden;}@media(max-width:800px){.wk-wheel{position:static!important;max-width:100%!important;width:100%!important;margin:0 auto 12px;padding:0!important;}.wk-wheel svg{max-width:100%!important;width:100%!important;}.wk-edit-btn button{width:24px!important;height:24px!important;font-size:12px!important;}.wk-pin{width:22px!important;height:22px!important;font-size:.7rem!important;}}@keyframes fadeIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.snap-scroll::-webkit-scrollbar{display:none}@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}@media(max-width:800px){.wk-outer{padding:20px 10px 40px!important;}}`}</style>
