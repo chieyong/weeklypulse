@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { supabase } from "./supabase";
 const PALETTE = [
   "#A89282","#8B7D6B","#9C8478","#A08C72","#7A6E5E","#B8A696",
   "#BDB0C4","#A8A0BE","#9B9EB8","#C4ADAD","#8E8AAE","#B8ADBA",
@@ -149,7 +150,7 @@ function Wheel({days,highlightIdx,centerText,filterPerson,filterLoc,filterCat,on
       pts.push(<circle key="c" cx={pos.x} cy={pos.y} r={1.8+hap*2} fill={"hsl(38,70%,"+(55-hap*12)+"%)"} opacity=".85"/>);
       els.push(<g key={"bl"+i+"-"+k} opacity={wDim ? .08 : dim ? .08 : 1} style={{transition:"opacity .3s"}}>{pts}</g>);});
     const mid=(ds+de)/2,lp=pol(mid,262);
-    els.push(<text key={"lb"+i} x={lp.x} y={lp.y} textAnchor="middle" dominantBaseline="central" fontFamily="'Playfair Display',serif" fontSize="12" fontWeight="600" fill={day.isWeekend?"#B8A08A":"#3D2E1F"} opacity={wDim ? .2 : dim ? .2 : 1} style={{transition:"opacity .3s",pointerEvents:"none"}}>{day.short}</text>);
+    els.push(<text key={"lb"+i} x={lp.x} y={lp.y} textAnchor="middle" dominantBaseline="central" fontFamily="'Playfair Display',serif" fontSize="12" fontWeight="600" fill="#3D2E1F" opacity={wDim ? .2 : dim ? .2 : 1} style={{transition:"opacity .3s",pointerEvents:"none"}}>{day.short}</text>);
     els.push(<path key={"hit"+i} d={arcP(ds,de,60,280)} fill="transparent" style={{cursor:"pointer"}} onClick={e=>{e.stopPropagation();onDayClick&&onDayClick(i);}}/>);
   });
   return (<svg viewBox="0 0 600 600" style={{width:"100%",height:"100%",maxHeight:"100%"}}>
@@ -193,7 +194,7 @@ function TimelineChart({days,cats,highlightIdx,filterCat,centerText,onDayClick})
     const hLineD="M"+hPts.map(p=>p.x.toFixed(1)+","+p.y.toFixed(1)).join("L");
     const lineOp=dim ? .08 : bright ? 1 : .6;
     return(<g key={"r"+i}>
-      <text x={padL-6} y={y+rowH/2+1} textAnchor="end" dominantBaseline="central" fontFamily="'Playfair Display',serif" fontSize="11" fontWeight="600" fill={day.isWeekend?"#B8A08A":"#3D2E1F"} opacity={dim ? .25 : 1} style={{pointerEvents:"none"}}>{day.short}</text>
+      <text x={padL-6} y={y+rowH/2+1} textAnchor="end" dominantBaseline="central" fontFamily="'Playfair Display',serif" fontSize="11" fontWeight="600" fill="#3D2E1F" opacity={dim ? .25 : 1} style={{pointerEvents:"none"}}>{day.short}</text>
       <rect x={padL} y={y} width={dayW} height={rowH} rx={5} fill={bright?"#F9EDE0":"#F5F0EA"} opacity={dim ? .1 : .2}/>
       {actAreas}
       <path d={eLineD} fill="none" stroke="rgba(61,46,31,.35)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity={dim ? .1 : .8} style={{transition:"opacity .3s"}}/>
@@ -328,7 +329,20 @@ const DelBtn = ({onClick,title}) => (
   <button onClick={onClick} title={title} style={{width:18,height:18,borderRadius:"50%",border:"1.5px solid #E8C4B4",background:"white",color:"#C75D3A",fontSize:".55rem",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .15s"}}>✕</button>
 );
 
-export default function App(){
+function useAuth() {
+  const [session, setSession] = useState(undefined);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session ?? null));
+    return () => subscription.unsubscribe();
+  }, []);
+  return session;
+}
+
+function WeeklyPulse(){
+  const session = useAuth();
+  const handleLogin = async () => { await supabase.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: window.location.origin } }); };
+  const handleLogout = async () => { await supabase.auth.signOut(); };
   const[members,setMembers]=useState(()=>clone(INIT_MEMBERS));
   const[order,setOrder]=useState(["ik","partner","son","daughter"]);
   const[member,setMember]=useState("ik");
@@ -399,7 +413,13 @@ export default function App(){
     <div className="wk-outer" style={{width:"100%",minHeight:"100vh",display:"flex",flexDirection:"column",padding:"20px 24px 52px",position:"relative"}}>
 
       {/* ── GEAR BUTTON – terracotta achtergrond als edit actief ── */}
-      <div style={{position:"absolute",top:12,right:12,zIndex:220,display:"flex",alignItems:"center"}} className="wk-edit-btn">
+      <div style={{position:"absolute",top:12,right:12,zIndex:220,display:"flex",alignItems:"center",gap:6}} className="wk-edit-btn">
+        {session
+          ? <button onClick={handleLogout} title="Uitloggen" style={{width:28,height:28,borderRadius:"50%",border:"none",background:"transparent",color:"#C8B8A8",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+          : null
+        }
         <button
           onClick={()=>setTabEdit(!tabEdit)}
           title="Edit personas & weeks"
@@ -413,13 +433,25 @@ export default function App(){
             boxShadow:tabEdit?"0 2px 10px rgba(199,93,58,.4)":"none",
             padding:0,lineHeight:1
           }}>
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="none" aria-hidden="true">
-            <rect x="0" y="0" width="16" height="2" rx="1" fill="currentColor"/>
-            <rect x="0" y="5" width="16" height="2" rx="1" fill="currentColor"/>
-            <rect x="0" y="10" width="16" height="2" rx="1" fill="currentColor"/>
-          </svg>
+<span aria-hidden="true" style={{fontSize:"15px",lineHeight:1}}>⚙</span>
         </button>
       </div>
+
+      {/* Demo banner — alleen zichtbaar als niet ingelogd */}
+      {!session && (
+        <div style={{background:"linear-gradient(135deg,#F5EDE3,#EDE0D4)",borderRadius:14,padding:"10px 16px 10px 16px",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap",border:"1px solid rgba(199,93,58,.12)",marginRight:40}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <div>
+              <p style={{margin:0,fontSize:".72rem",fontWeight:700,color:"#3D2E1F",fontFamily:"Nunito"}}>Je bekijkt demo data</p>
+              <p style={{margin:0,fontSize:".65rem",color:"#8A7560",fontFamily:"Nunito",fontWeight:400}}>Log in om eigen data op te slaan</p>
+            </div>
+          </div>
+          <button onClick={handleLogin} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 14px",borderRadius:20,border:"none",background:"#C75D3A",color:"white",cursor:"pointer",fontFamily:"Nunito",fontWeight:700,fontSize:".68rem",whiteSpace:"nowrap",flexShrink:0}}>
+            <svg width="12" height="12" viewBox="0 0 48 48"><path fill="white" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.5 30.2 0 24 0 14.7 0 6.7 5.4 2.7 13.3l7.8 6.1C12.4 13 17.7 9.5 24 9.5z"/><path fill="white" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17z"/><path fill="white" d="M10.5 28.6A14.8 14.8 0 019.5 24c0-1.6.3-3.1.8-4.6l-7.8-6.1A23.9 23.9 0 000 24c0 3.9.9 7.5 2.6 10.7l7.9-6.1z"/><path fill="white" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.2-7.7 2.2-6.3 0-11.6-3.5-13.5-8.3l-7.9 6.1C6.7 42.6 14.7 48 24 48z"/></svg>
+            Inloggen met Google
+          </button>
+        </div>
+      )}
 
       <div ref={titleRef} style={{textAlign:"center",marginBottom:isMobile?22:30}}>
         {tabEdit?(<input value={pageTitle} onChange={e=>setPageTitle(e.target.value)} style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(2rem,5vw,3rem)",fontWeight:700,letterSpacing:"-.02em",marginBottom:4,border:"none",borderBottom:"2px dashed #C75D3A",background:"transparent",textAlign:"center",outline:"none",color:"#3D2E1F",width:"80%",maxWidth:500}}/>):(<h1 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(2rem,5vw,3rem)",fontWeight:700,letterSpacing:"-.02em",marginBottom:4}}>{pageTitle}</h1>)}
@@ -540,7 +572,7 @@ export default function App(){
       {/* Visual area */}
       {multiMode==="enkel" ? (
         <div style={{flex:1,display:"flex",justifyContent:"center",alignItems:isMobile?"flex-start":"center",minHeight:0}}>
-          <div ref={wheelRef} style={{width:"100%",maxWidth:vizMode==="wheel"?"min(calc(100vh - 220px),840px)":"840px",maxHeight:vizMode==="wheel"?"calc(100vh - 220px)":undefined,display:"flex",justifyContent:"center",flexDirection:"column",alignItems:"center"}}>
+          <div ref={wheelRef} style={{width:"100%",maxWidth:vizMode==="wheel"?("min(calc(100vh - "+(session?"250":"320")+"px),840px)"):"840px",maxHeight:vizMode==="wheel"?("calc(100vh - "+(session?"250":"320")+"px)"):undefined,display:"flex",justifyContent:"center",flexDirection:"column",alignItems:"center"}}>
             {vizMode==="wheel" ? (
               <Wheel days={days} highlightIdx={drawerDay!==null?drawerDay:hl} centerText={center} filterPerson={fP} filterLoc={fL} filterCat={fC} onDayClick={i=>{setMultiMode("enkel");setDrawerDay(drawerDay===i?null:i);}}/>
             ) : (
@@ -617,3 +649,5 @@ export default function App(){
     </div>}
   </div>);
 }
+
+export default function App() { return <WeeklyPulse />; }
